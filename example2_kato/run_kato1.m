@@ -2,16 +2,16 @@
 % cone programs as presented in [1]
 % Experiment 1: Linear constrain
 % [1] Kato, H., Fukushima, M. An SQP-type algorithm for nonlinear 
-% second-order cone programs. Optimization Letters 1, 129–144 (2007). 
+% second-order cone programs. Optimization Letters 1, 129-144 (2007). 
 % https://doi.org/10.1007/s11590-006-0009-2
 
 % set seed
 seed = RandStream('mt19937ar','Seed',1);
 
 % choice of cones for the example
-%mj= [5;5];
-%mj= [5;5;20];
-mj=[5;5;20;20];
+mj= [5;5];
+mj= [5;5;20];
+%mj=[5;5;20;20];
 %mj=[10;10;20;20;10];
 %mj=[10;10;20;20;20;20];
 %mj=[20;20;30;30;20;30;10];
@@ -48,24 +48,28 @@ x0 = (-1+2*rand(seed,n,1))*t;
 %a negative value of lamb_min means that the initial data is unfeasible
 lamb_min = spectral_decomposition(g_kato1_lin(x0,A,b),mj);
 
-while(min(lamb_min) < default_options.TolCon(1))
+while(min(lamb_min) < default_options.ConstraintTolerance(1))
    t = 0.8*t;
    x0 = (-1+2*rand(seed,n,1))*t;
    lamb_min = spectral_decomposition(g_kato1_lin(x0,A,b),mj);
 end
 
-disp('x0= ');disp(x0); 
-disp ('lambda gj= '); disp(lamb_min);
-
 disp('experiment 1a: Hessian update BFGS ');
-my_options = fdipa_options('Display', 'iter', 'TolX',1e-4,'Maxiter',200,...
-    'Hessian','bfgs');
-xmin=fdipa(@(x)fun_kato1(x,C,d,f),x0,y0,@(x)g_kato1_lin(x,A,b),mj,my_options);
+my_options = fdipa_options('Display', 'final', 'StepTolerance',1e-10,'MaxIterations',200,...
+    'HessianApproximation','bfgs');
+[x,fval,exitflag,output] =fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
+fprintf('[');
+fprintf('%g, ', mj(1:end-1));
+fprintf('%g]', mj(end));
+fprintf(' & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp('experiment 1b: Hessian update Mod-Newton ');
-my_options = fdipa_options('Display', 'iter', 'TolX',1e-4,'Maxiter',200,...
-    'Hessian','mod-newton','Hessfnc',@(x)hess_update_kato1(x,C,d));
-xmin=fdipa(@(x)fun_kato1(x,C,d,f),x0,y0,@(x)g_kato1_lin(x,A,b),mj,my_options);
-
+my_options = fdipa_options('Display', 'final', 'StepTolerance',1e-10,'MaxIterations',200,...
+    'HessianApproximation','mod-newton','HessianFcn',@(x)hess_update_kato1(x,C,d));
+[x,fval,exitflag,output]=fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
+fprintf('[');
+fprintf('%g, ', mj(1:end-1));
+fprintf('%g]', mj(end));
+fprintf(' & %d & %11f & %11.5e & %11f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.cputime)
 clear 'A' 'b' 'C' 'd' 'default_options' 'f' 'i' 'first'  'lamb_min' 'last' ...
     'mj' 'my_options' 'n' 'nCones' 'seed' 't' 'x0' 'xmin' 'y0' 'Z'

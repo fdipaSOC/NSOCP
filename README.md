@@ -37,6 +37,23 @@ The scripts are organized in the following folders:
 * `example6_cubic`: example of cubic objective function with linear constraints.
 * `example7_rotated_conic`: example of a quadratic objective with rotated conic constraints (see documentation for details).
 
+## Citing
+This repository has been developed as part of the following article (citation given below). We would appreciate it if you would please cite the following paper if you found the library useful for your work.
+
+```
+@article{awasthi2023matnli,
+    title = {FDIPA-SOC: A Matlab package for nonlinear Second-Order Cone programs},
+    author = {Canelasa, A. and Carrasco, M and L\'opez, J and Paduro, E.},
+    journal = {2024},
+    volume = {},
+    pages = {},
+    year = {},
+    publisher={},
+    doi = {},
+    url = {}
+}
+```
+
 ## References
 
 

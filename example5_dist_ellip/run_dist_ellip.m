@@ -13,23 +13,35 @@ y0 = [];
 mj = [3;3];
 
 disp('Experiment 1: TolCon 1e-15, maximum iterations 300, bfgs Hessian update');
-my_options = fdipa_options('Display','iter','TolCon',1e-15, ...
-    'Maxiter',300,'Hessian','bfgs');
-fdipa(@fun_dist_ellip,x0,y0,@g_dist_ellip,mj,my_options);
+my_options = fdipa_options('Display','iter','ConstraintTolerance',1e-15, ...
+    'MaxIterations',300,'HessianApproximation','bfgs');
+[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',1, output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp('Experiment 2: default options');
-fdipa(@fun_dist_ellip,x0,y0,@g_dist_ellip,mj);
+[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0);
+
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',2, output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp('Experiment 3: TolCon 1e-15, Hessian update off');
-my_options = fdipa_options('Display','iter','TolCon',1e-15,'Hessian','off');
-fdipa(@fun_dist_ellip,x0,y0,@g_dist_ellip,mj,my_options);
+my_options = fdipa_options('Display','iter','ConstraintTolerance',1e-15,'HessianApproximation','off');
+[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',3, output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp('Experiment 4: bfgs Hessian update, TolCon 1e-15');
-my_options = fdipa_options('TolCon',1e-15,'Hessian','bfgs');
-fdipa(@fun_dist_ellip,x0,y0,@g_dist_ellip,mj,my_options);
+my_options = fdipa_options('ConstraintTolerance',1e-15,'HessianApproximation','bfgs');
+[x,fval,exitflag,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',4, output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp('Experiment 5: bfgs Hessian update');
-my_options = fdipa_options('Hessian','bfgs');
-fdipa(@fun_dist_ellip,x0,y0,@g_dist_ellip,mj,my_options);
+my_options = fdipa_options('HessianApproximation','bfgs');
+[x,fval,exitflag,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',5, output.iterations,fval, output.firstorderopt, output.cputime)
 
-clear 'x0' 'y0' 'mj' 'my_options'
+clear 'x0' 'y0' 'mj' 'my_options' 'x' 'fval' 'exitflag' 'output'

@@ -12,13 +12,14 @@
 %
 disp('Experiment 1, a): using BFGS hessian update');
 x0 = [1;0;0;0;0];
-my_options = fdipa_options('TolCon',1e-12,'Maxiter',100,'Hessian','bfgs');
-fdipa(@fun_miao_ex1,x0,[],@g_miao_ex1,5,my_options);
+my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100,...
+    'HessianApproximation','bfgs');
+fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
 
 disp('Experiment 1, b): using Modified newton hessian update');
-my_options = fdipa_options('TolCon',1e-12,'Maxiter',100, ...
-    'Hessian','mod-newton','Hessfnc',@hess_update_miao_ex1);
-fdipa(@fun_miao_ex1,x0,[],@g_miao_ex1,5,my_options);
+my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100, ...
+    'HessianApproximation','mod-newton','HessianFcn',@hess_update_miao_ex1);
+fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
 
 
 %% Example 5.2 of [1]
@@ -31,12 +32,13 @@ fdipa(@fun_miao_ex1,x0,[],@g_miao_ex1,5,my_options);
 %
 x0 = [1;0];
 disp('Experiment 2, a): using BFGS Hessian update');
-my_options = fdipa_options('TolCon',1e-12,'Maxiter',100,'Hessian','bfgs');
-fdipa(@fun_miao_ex2,x0,[],@g_miao_ex2,[],my_options);
+my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100,...
+    'HessianApproximation','bfgs');
+fdipa(@fun_miao_ex2,x0,@g_miao_ex2,[],[],my_options);
 
 disp('Experiment 2, b): using modified newton Hessian update');
-my_options = fdipa_options('TolCon',1e-12,'Maxiter',100, ...
-    'Hessian','mod-newton','Hessfnc',@hess_update_miao_ex2);
-fdipa(@fun_miao_ex2,x0,[],@g_miao_ex2,[],my_options);
+my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100, ...
+    'HessianApproximation','mod-newton','HessianFcn',@hess_update_miao_ex2);
+fdipa(@fun_miao_ex2,x0,@g_miao_ex2,[],[],my_options);
 
 clear 'x0' 'my_options' 

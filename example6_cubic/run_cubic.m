@@ -11,8 +11,11 @@ mj = [1;1];
 A = [1 2 2;-1 -2 -2];
 b = [0;72];
     
-my_options = fdipa_options('Display','iter','TolCon',1e-15,'Maxiter',50 ...
-    ,'Hessian','bfgs');
-xmin=fdipa(@fun_cubic,x0,y0,@(x)gj_cubic(x,A,b),mj,my_options);
+my_options = fdipa_options('Display','iter','ConstraintTolerance',1e-15,'MaxIterations',50 ...
+    ,'HessianApproximation','bfgs');
+[~,fval,~,output] =  fdipa(@fun_cubic,x0,@(x)gj_cubic(x,A,b),mj,y0,my_options);
 
-clear 'A' 'b' 'x0' 'y0' 'mj' 'xmin' 'my_options'
+%for paper [x,fval,exitflag,output]
+fprintf('%d & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, output.firstorderopt, output.cputime)
+
+clear 'A' 'b' 'x0' 'y0' 'mj' 'my_options'

@@ -7,4 +7,4 @@ function [fun,grad_f]=fun_kato2(x,C,d,e,f)
 % https://doi.org/10.1007/s11590-006-0009-2
     x=x(:);
     fun=x'*C*x+d'*(x.^4)+e'*(x.^3)+f'*x;
-    grad_f=2*C*x+4*(d.*(x.^3))+3*(e.*(x.^2))+f;
+    grad_f=(C + C')*x+4*(d.*(x.^3))+3*(e.*(x.^2))+f;

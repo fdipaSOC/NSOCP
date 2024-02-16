@@ -11,14 +11,14 @@
 % Example1: Linear cone contraint Quadratic objective
 
 % Construction of the matrices for the problem
-N=16;
+N=30;
 vertices=[ones(1,N); zeros(N-1,N)];
 x0=10*eye(N);
 x0=reshape(x0,N^2,1);
 b=-reshape(vertices,N^2,1);
 matAi=eye(N);
 matA=zeros(N^2);
-
+cvec=zeros(N^2,1);
 for i=1:N
     matA((i-1)*N+1:i*N, (i-1)*N+1:i*N)=matAi(:,[2:i,1,(i+1):N]); 
 end
@@ -31,8 +31,41 @@ for i=1:N
 end
 matQ=N*speye(N^2)-matJ;
 
-my_options = fdipa_options('Display','iter','TolCon',1e-15,'Maxiter',300);
-xmin = fdipaQuad(matQ,zeros(N^2,1),matA,b,x0,[],mj,my_options);
+my_options = fdipa_options('Display','iter');
+[x,fval,exitflag,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
 
-clear 'b'  'i' 'j' 'matJ' 'matA' 'matAi' 'matQ' 'mj' 'my_options' 'N' ...
-    'vertices' 'x0' 'xmin' 'y0'
+% Which is equivalent to an explicit call to fdipa
+
+problem.objective = @(x) quad_fun(x,matQ,cvec) ;
+problem.x0 = x0;
+problem.y0 = [];
+problem.gj = @(x) linear_constraint_fun(x,matA,b);
+problem.mj = mj;
+my_options.edit('HessianApproximation','user-supplied');
+b_update = @(xnew,xk,grad_xnew, grad_fxk, matB) matQ;
+my_options.edit('HessianFcn',b_update);
+problem.options = my_options;
+[x,fval,exitflag,output] = fdipa(problem);
+
+% In order to use a different Hessian update we choose the appropriate option
+my_options = fdipa_options('Display','iter','HessianApproximation','bfgs');
+[x,fval,exitflag,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
+
+
+disp(output)
+
+clear 'b'  'i' 'j' 'matJ' 'matA' 'matAi' 'matQ' 'cvec' 'mj' ...
+    'my_options' 'N' 'vertices' 'x0' 'xmin' 'y0' 'problem' 'x' ...
+    'fval' 'exitflag' 'output' 'b_update'
+
+function [f,grad_f]=quad_fun(x,Q,c)
+    x = x(:);
+    f=1/2 *x'*Q*x + c'*x;
+    grad_f=Q*x + c;
+end
+
+function [g,grad_g]=linear_constraint_fun(x,A,b)
+    x= x(:);
+    g=A*x+b;
+    grad_g=A;
+end
