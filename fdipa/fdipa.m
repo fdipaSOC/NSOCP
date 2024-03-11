@@ -54,16 +54,17 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 %  - output: A structure with information about the optimization. The 
 %            fields of the structure are the following:
 %        output.iterations: Number of iterations taken
-%        output.constrviolation: Maximun of constraint functions
+%        output.constrviolation: number of contraints not satisfied
 %        output.stepsize: Length of last displacement in x
 %        output.firstorderopt: Measure of first-order optimality
 %        output.message: Exit message
 %        output.bestfeasible: structure with the best feasible solution
 %            found
 %  - lambda: Structure with fields containing the Lagrange multipliers at the 
-%        solution x
+%        solution x:
+%        lambda.gj:  lagrange multiplier corresponding to the inequality contraints
 %  - grad: Gradient of fun at the solution x.
-%  - hessian: Hessian of fun at the solution x.
+%  - hessian: Hessian approximation at the solution x.
 %
 % USAGE:
 %   x = fdipa(fun,x0,[gj])
@@ -83,22 +84,19 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 % 
 
     t0 = cputime;
-    % verification for the number of arguments is correct
     exitflag = 0;
-
+    % verification for the number of arguments is correct
     if ~any([1,3,4,5,6]==nargin)
         error('fdipa: Wrong number of inputs.');
     end
-
-
+    % Sort the input data in the corresponding variables
     if nargin==1
         if ~isstruct(varargin{1})
             error('fdipa: The input has not the correct format');
         end
         problem = varargin{1};
         if ~all(isfield(problem,{'objective','x0','gj'}))
-            error(['fdipa: The input has not the correct format, ' ...
-                'missing fields']);
+            error('fdipa: The input structure is missing required fields');
         end
         fun = problem.objective;
         x0 = problem.x0;
@@ -106,12 +104,12 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         if isfield(problem,'mj')
             mj = problem.mj;
         else
-            mj = []
+            mj = [];
         end
-        if isfield(problem,'mj')
+        if isfield(problem,'y0')
             y0 = problem.y0;
         else
-            y0 = []
+            y0 = [];
         end
         if isfield(problem,'options')
             options = problem.options;
@@ -144,13 +142,13 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         end
     end
   
-    
-    % check if the gradient of the objective function is provided, if not, stop.
+    % preliminary checks on the input data
+    % check if the gradient of the objective function is provided
     if nargout(fun)==1
         error('fdipa: You must supply the gradient of the objetive function.');
     end
     
-    % check if the gradient of the constraints gj provided, if not, stop
+    % check if the gradient of the constraints gj provided
     if nargout(gj)==1
         error('fdipa: You must supply the gradient of the cone constraints.');
     end
@@ -158,7 +156,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     % set the initial condition to a column vector
     x0=x0(:);
     
-    % check compatibility of the input variables and functions
+    % check compatibility of dimensions between the input variables and functions
     [~,gradfx0] = fun(x0);   
     [gx0,gradgx0] = gj(x0); 
     dimx = length(x0);   
@@ -170,6 +168,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     % assumed that there is only one cone
     if min(size(mj))==0
         mj = length(gx0);
+    end
+    %the dimensions of the cones must agree with the contraints
+    if length(gx0) ~= sum(mj)
+        error('fdipa: The dimensions of the cones mj are incompatible with gj(x).');
     end
     
     n_cones = length(mj); % number of cones
@@ -205,30 +207,36 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     % End of validations    
     
     % Options load: Hessian
+    if strcmp(options.HessianApproximation,'default')
+        options.HessianApproximation = 'bfgs';
+    end
+
     switch options.HessianApproximation
         case 'off'
-            matB=eye(dimx);
+            b_update = @(x_new,x_old,y_new,y_old,fun,gj,hess_old) eye(dimx);
         case 'bfgs'
-            matB=eye(dimx);
             b_update = @bfgs_update;
-        case 'mod-newton'
-            if ~isa(options.HessianFcn,'function_handle')
-                error(append('fdipa: options.HessianApproximation = mod-newton, you ', ...
-                    'must supply an update of the Hessian or change ', ...
-                    'options.HessianApproximation'));
-            else
-                b_update = options.HessianFcn;
-                matB=eye(dimx); 
+            if isnan(options.HessianResetIterations)
+                options.HessianResetIterations = dimx;
             end
-        case 'on'
-            if ~isa(options.HessianFcn,'function_handle')
-                error(append('fdipa: options.HessianApproximation = on, you ', ...
-                    'must supply an update of the Hessian or change ', ...
-                    'options.HessianApproximation'));
-            else
-                b_update = options.HessianFcn;
-                matB=eye(dimx); 
-            end
+        % case 'mod-newton'
+        %     if ~isa(options.HessianFcn,'function_handle')
+        %         error(append('fdipa: options.HessianApproximation = mod-newton, you ', ...
+        %             'must supply an update of the Hessian or change ', ...
+        %             'options.HessianApproximation'));
+        %     else
+        %         b_update = options.HessianFcn;
+        %         matB=eye(dimx); 
+        %     end
+        % case 'on'
+        %     if ~isa(options.HessianFcn,'function_handle')
+        %         error(append('fdipa: options.HessianApproximation = on, you ', ...
+        %             'must supply an update of the Hessian or change ', ...
+        %             'options.HessianApproximation'));
+        %     else
+        %         b_update = options.HessianFcn;
+        %         matB=eye(dimx); 
+        %     end
         case 'user-supplied'
             if ~isa(options.HessianFcn,'function_handle')
                 error(append('fdipa: options.Hessian = supplied, you ', ...
@@ -236,11 +244,15 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
                     'options.HessianApproximation'));
             else
                 b_update = options.HessianFcn;
-                matB=eye(dimx); 
             end
         otherwise 
             error('fdipa:Choosen option for the Hessian is not valid.');
     end
+
+    if isnan(options.HessianResetIterations)
+        options.HessianResetIterations = options.MaxIterations+1 ;
+    end
+
 
     % cast vectors as column vectors    
     gx0 = gx0(:);
@@ -249,18 +261,19 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     % Step 0
     xk = x0; 
     yk = y0;
- 
+    matB=eye(dimx); 
     lamb_min =spectral_decomposition(gx0,mj);
     total_time = cputime-t0;    
     % Check feasible point, min(lamb_min) < 0 means that the point is unfeasible
-    if min(lamb_min)<-options.ConstraintTolerance(1)
+    %if min(lamb_min)<-options.ConstraintTolerance(1)
+    if min(lamb_min)<0
         x = x0;
         [fval,grad] = fun(x); 
         exitflag = -1;
         % output
         output.iterations = 0;
         output.cputime = total_time;
-        output.constrviolation = sum(lamb_min<=-options.ConstraintTolerance(1));
+        output.constrviolation = sum(lamb_min<0);
         output.stepsize = [];
         output.firstorderopt = [];
         output.message = 'fdipa:starting point is unfeasible';
@@ -276,29 +289,13 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     for k=0:options.MaxIterations
         time_k = cputime;
         % Step 1
-        % constraint and gradient evaluation
+        % evaluate Lagrangian at (x,yk)
         [gxk,grad_gxk] = gj(xk); 
-        % cast gxk as column vector
-        gxk = gxk(:);
-        % compute the first spectral value on each cone
-        lamb_min=spectral_decomposition(gxk,mj);
-            arrw_inv_g=arrow_inv(gxk,mj); % Inverse arrow matrix of gj(xk)
-        arrw_y=arrow(yk,mj); % Arrow matrix of yk
-        arrw_g=arrow(gxk,mj); % Arrow matrix of gj(xk)
-            [fxk,grad_fxk] = fun(xk); % objective and gradient function evaluation
+        gxk = gxk(:);       
+        [fxk,grad_fxk] = fun(xk);
         grad_fxk = grad_fxk(:);
-        
-        % (i) Solving 1st System 
-        % here we use that 'ya' can be solved explicitely in terms of 'da'
-        matM1=arrw_inv_g*arrw_y*grad_gxk;
-        da=-(matB+grad_gxk'*matM1)\grad_fxk;
-        ya=-matM1*da;
-        norm_da = norm(da); 
-        % gradient of Lagrangian in (x,ya)
-        grad_Lag_x=grad_fxk -grad_gxk'*ya; 
-        % norm gradient of Lagrangian in (x,ya)
-        norm_Lag = norm(grad_Lag_x);  
-      
+        norm_Lag = norm(grad_fxk -grad_gxk'*yk);  
+
         %Report iteration information
         % Start screen information table in case 'iter'             
         if strcmp(options.Display,'iter')
@@ -307,7 +304,9 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             for i=1:n_cones
                 gjyj = gjyj + abs(dot(gxk(block_begin(i):block_end(i)) ...
                                              ,yk(block_begin(i):block_end(i))));
-            end        
+            end
+            % verify feasibility
+            lamb_min=spectral_decomposition(gxk,mj);        
             if k==0
                 fprintf(append(repelem(' ',32),'Feasibility  First-order    Dual step  Comp. Slack.\n'));
                 fprintf(append('Iter         f(x)    Step-size    (lambmin)   optimality  ',...
@@ -323,10 +322,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         if k == options.MaxIterations
             break
         end
-        %  stop if norm of the direction vector is too small
-        if norm_da < options.StepTolerance
-            break
-        end 
+   
         % stop if first order optimallity is satified
         if norm_Lag <options.OptimalityTolerance
             break 
@@ -334,6 +330,21 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         if k>0 && stepsize < options.StepTolerance
             break
         end
+
+        % (i) Solving 1st System 
+        arrw_y=arrow(yk,mj); % Arrow matrix of yk
+        arrw_g=arrow(gxk,mj); % Arrow matrix of gj(xk)        
+        % solve for both (da, ya) simultaneously and split it later
+        daya=[matB -grad_gxk'; arrw_y*grad_gxk arrw_g]\[-grad_fxk; zeros(sum(mj),1)];
+        da = daya(1:dimx);
+        ya = daya((dimx+1):(dimx + sum(mj)));
+        norm_da = norm(da); 
+
+        %  stop if norm of the direction vector is too small
+        if norm_da < options.StepTolerance
+            break
+        end 
+
         % (ii) Solving 2nd system 
         
         % solve for both (db, yb) simultaneously and split it later
@@ -368,7 +379,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         % enough descend, the point we reach is feasible and an additional 
         % technical spectral condition specified in the algorithm
         has_enough_descend = fxt-fxk<=t*options.ParEta*desc_dir'*grad_fxk;
-        is_feasible = min(lamb_min_t)>-options.ConstraintTolerance(1);
+        %we require that we are strictly in the interior since it is a
+        %interior point algorithm
+        is_feasible = min(lamb_min_t)>0;
+        %is_feasible = min(lamb_min_t)>-options.ConstraintTolerance(1);
         [lambda1_gxk,lambda2_gxk,u1_gxk,u2_gxk] ...
             = spectral_decomposition(gxk,mj);
         % spectral conditions
@@ -402,7 +416,8 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             lamb_min_t=spectral_decomposition(gxt,mj);
             iter_lin=iter_lin+1;
             has_enough_descend = fxt<=fxk+t*options.ParEta*desc_dir'*grad_fxk;
-            is_feasible = min(lamb_min_t)>-options.ConstraintTolerance(1);
+            %is_feasible = min(lamb_min_t)>-options.ConstraintTolerance(1);
+            is_feasible = min(lamb_min_t)>0;
             % spectral conditions
             satisfy_spectral_condition = true;
             [lambda1_gxt,lambda2_gxt] ...
@@ -429,26 +444,19 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         end
         
         % Step 3: Updates
-    
         % New primal point
-        xnew=xk + t*desc_dir; 
-        
-        % New dual point
-        % Spectral decomposition of g(xnew)
-        [~,grad_gxk1] = gj(xnew);
-        %[gxnew,grad_gxk1] = gj(xnew);
-        %gxnew = gxnew(:);
-        
-        % update y step
+        xnew=xk + t*desc_dir;       
+        % update y 
+
         ynew = zeros(dimg,1);
         [~,~,u1_gxt,u2_gxt] = spectral_decomposition(gxt,mj);
-        
         for i=1:n_cones
             if mj(i)==1
                 % update y
-                ynew(block_begin(i))= max(ya(block_begin(i)),0.001*norm(da)^2);
+                ynew(block_begin(i))= max(ya(block_begin(i)),options.ParCI);
             else
                 % Projection of yak in the subspace u1,u2
+                % multiply by 2 because u1,u2 are not unit vectors
                 yu1 = 2*dot(ya(block_begin(i):block_end(i)) ...
                         ,u1_gxt(block_begin(i):block_end(i)));
                 yu2 = 2*dot(ya(block_begin(i):block_end(i)) ...
@@ -461,36 +469,31 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
                         *u2_gxt(block_begin(i):block_end(i));
             end    
         end
+        %check for y feasible?
+        if min(spectral_decomposition(ynew,mj))<0
+            error("multiplier outside the cone")
+        end
+
         
         % Update Bk
-        grad_Lag_x=grad_fxk -grad_gxk'*ynew;
-        [~,grad_fxk1] = fun(xnew);
-        grad_fxk1 = grad_fxk1(:);
-        grad_xnew=grad_fxk1 -grad_gxk1'*ynew;
-        if ~strcmp(options.HessianApproximation,'off')
-            if strcmp(options.HessianApproximation, 'mod-newton') 
-                xkyk = zeros(dimx+dimg,1);
-                xkyk(1:dimx) = xk;
-                xkyk(dimx+(1:dimg)) = yk;
-                matB = b_update(xkyk);
-            elseif strcmp(options.HessianApproximation, 'bfgs') 
-                %reset the Hessian after dimx iterations to ensure
-                %Assumption 3.5 is satisfied
-                if mod(k+1,dimx)==0
-                    matB = eye(dimx);
-                else
-                    matB = b_update(xnew,xk,grad_xnew, grad_Lag_x, matB);
-                end             
-            else
-                matB = b_update(xnew,xk,grad_xnew, grad_fxk, matB);
-            end
-            %%why is this here?
-            %if sum(isnan(matB)>0)
-            %    matB = eye(dimx);
-            %end
+        if mod(k+1,options.HessianResetIterations)==0
+            matB = eye(dimx);
+            %fprintf('reset iteration')
         else
+            matB = b_update(xnew,xk,ynew,yk,fun,gj, matB);
+        end 
+        % A quantifiable way of checking that Assumtion 3.5 in [1] is satisfied 
+        % is to reset the matrix B to the identity if the condition number is too small
+        % Condition on sigma2 not being too large
+        if eigs(matB,1) > options.ParSigma2 
+            matB = eye(dimx);
+            fprintf('Sigma2 too large\n')
+        end
+        % Condition on the ratio sigma2/sigma1 not being too large
+        if cond(matB) > options.NumericalConditioning %|| rcond(matB) < 1/options.NumericalConditioning
             matB = eye(dimx);
         end
+
         
         stepsize = norm(t*desc_dir);
         dual_stepsize= norm(ynew-yk);
@@ -501,14 +504,14 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         total_time = total_time + delta_time_k;
     end
 
-    %generate output
+    %generate output structure
     delta_time_k = cputime-time_k;
     total_time = total_time+delta_time_k;
     x= xk;
     [fval,grad] = fun(x); 
     output.iterations = k;
     output.cputime = total_time;
-    output.constrviolation = sum(lamb_min<-options.ConstraintTolerance(1));
+    output.constrviolation = sum(lamb_min<0);
     output.firstorderopt = norm_Lag;
     output.bestfeasible.x = x;
     output.bestfeasible.fval = fval;

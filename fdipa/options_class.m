@@ -2,15 +2,16 @@
 classdef options_class < handle
     properties 
         Display; %indicates how much information will be shown
-        SpecifyConstraintGradient; % UNUSED
-        SpecifyObjectiveGradient; % UNUSED
+        %SpecifyConstraintGradient; % UNUSED
+        %SpecifyObjectiveGradient; % UNUSED
         MaxIterations; %maximum number of iteration for the algorithm
-        ConstraintTolerance; %tolerance in the values of the constrain function
+        %ConstraintTolerance; %tolerance in the values of the constrain function
         OptimalityTolerance; % stopping test: Lagragian
         StepTolerance; % stopping test: da - direction 
-        HessianFcn; % a handler to custom Hessian function
-        HessianApproximation; % indicates if explcit or approximated 
-                              % hessian is used
+        HessianFcn; % a function handle to custom Hessian function
+        HessianApproximation; % indicates what hessian approximation will be used
+        HessianResetIterations; %integer that indicates the numbers 
+        % of iteration before reseting the Hessian to the identity matrix
         ParXi;
         ParEta;
         ParNu;
@@ -18,20 +19,23 @@ classdef options_class < handle
         ParCI;
         ParCS;
         ParLambdam;
+        ParSigma2;
+        NumericalConditioning;
     end
    
     methods
         function opt = options_class() 
         %Constructor of the class, set the default values of the parameters
             opt.Display = 'final';
-            opt.SpecifyConstraintGradient= 'on';
-            opt.SpecifyObjectiveGradient = 'on';
+%            opt.SpecifyConstraintGradient= 'on';
+%            opt.SpecifyObjectiveGradient = 'on';
             opt.MaxIterations = 1000;
-            opt.ConstraintTolerance = 1e-6;
+            %opt.ConstraintTolerance = 1e-6;
             opt.OptimalityTolerance = 1e-6;
             opt.StepTolerance = 1e-10;
             opt.HessianFcn  = NaN;
-            opt.HessianApproximation= 'bfgs';
+            opt.HessianApproximation= 'default';
+            opt.HessianResetIterations = NaN;
             opt.ParXi= 0.7;
             opt.ParEta= 0.5;
             opt.ParNu= 0.7;
@@ -39,6 +43,8 @@ classdef options_class < handle
             opt.ParCI= 1e-9;
             opt.ParCS = 1e9;
             opt.ParLambdam = 1e-4;
+            opt.ParSigma2 = 1e15;
+            opt.NumericalConditioning = 1e15;
         end
       
         function status = edit(opt,varName,value) 
@@ -76,32 +82,32 @@ classdef options_class < handle
                     else
                         status=2;
                     end
-                case 'SpecifyConstraintGradient'
-                    if ischar(value)==1
-                        switch value
-                            case 'on' 
-                                opt.SpecifyConstraintGradient = value;
-                            case 'user-defined' 
-                                opt.SpecifyConstraintGradient = value;
-                            otherwise
-                                status=3;
-                        end
-                    else
-                        status=2;
-                    end
-                case 'SpecifyObjectiveGradient'
-                    if ischar(value)==1
-                        switch value
-                            case 'on' 
-                                opt.SpecifyObjectiveGradient = value;
-                            case 'user-defined' 
-                                opt.SpecifyObjectiveGradient = value;
-                            otherwise
-                                status=3;
-                        end
-                    else
-                        status=2;
-                    end
+                % case 'SpecifyConstraintGradient'
+                %     if ischar(value)==1
+                %         switch value
+                %             case 'on' 
+                %                 opt.SpecifyConstraintGradient = value;
+                %             case 'user-defined' 
+                %                 opt.SpecifyConstraintGradient = value;
+                %             otherwise
+                %                 status=3;
+                %         end
+                %     else
+                %         status=2;
+                %     end
+                % case 'SpecifyObjectiveGradient'
+                %     if ischar(value)==1
+                %         switch value
+                %             case 'on' 
+                %                 opt.SpecifyObjectiveGradient = value;
+                %             case 'user-defined' 
+                %                 opt.SpecifyObjectiveGradient = value;
+                %             otherwise
+                %                 status=3;
+                %         end
+                %     else
+                %         status=2;
+                %     end
                 case 'MaxIterations'
                     if isnumeric(value)==1
                         if value>0
@@ -112,16 +118,16 @@ classdef options_class < handle
                     else
                         status=2;
                     end
-                case 'ConstraintTolerance'
-                    if isnumeric(value)==1
-                        if value>0
-                            opt.ConstraintTolerance = value;
-                        else
-                            status=3;
-                        end
-                    else
-                        status=2;
-                    end
+                % case 'ConstraintTolerance'
+                %     if isnumeric(value)==1
+                %         if value>0
+                %             opt.ConstraintTolerance = value;
+                %         else
+                %             status=3;
+                %         end
+                %     else
+                %         status=2;
+                %     end
                 case 'OptimalityTolerance'
                     if isnumeric(value)==1
                         if value>0
@@ -153,13 +159,11 @@ classdef options_class < handle
                         switch value
                             case 'off' 
                                 opt.HessianApproximation = value;
-                            case 'on' 
+                            case 'default' 
                                 opt.HessianApproximation = value;
                             case 'user-supplied' 
                                 opt.HessianApproximation = value;
                             case 'bfgs' 
-                                opt.HessianApproximation = value;
-                            case 'mod-newton' 
                                 opt.HessianApproximation = value;
                             otherwise
                                 status=3;
@@ -167,6 +171,16 @@ classdef options_class < handle
                     else
                         status=2;
                     end
+                    case 'HessianResetIterations'
+                        if isnumeric(value)==1
+                            if value>0
+                                opt.HessianResetIterations = value;
+                            else
+                                status=3;
+                            end
+                        else
+                            status=2;
+                        end                    
                 case 'ParXi'
                     if isnumeric(value)==1
                         if (value>0)&&(value<1)
@@ -231,6 +245,26 @@ classdef options_class < handle
                     if isnumeric(value)==1
                         if min(value)>0
                             opt.ParLambdam = value;
+                        else
+                            status=3;
+                        end
+                    else
+                        status=2;
+                    end
+                case 'ParSigma2'
+                    if isnumeric(value)==1
+                        if min(value)>0
+                            opt.ParSigma2 = value;
+                        else
+                            status=3;
+                        end
+                    else
+                        status=2;
+                    end 
+                case 'NumericalConditioning'
+                    if isnumeric(value)==1
+                        if min(value)>0
+                            opt.NumericalConditioning = value;
                         else
                             status=3;
                         end

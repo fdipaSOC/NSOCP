@@ -1,3 +1,4 @@
+function [f,Gf,Hf]=f_svm_CoDo(x,theta)
 % Function to minimize
 % Support vector machine with Cobb-Douglas function
 % f(w,b,ka_1,ka_2)=-theta*log(ka_1^2/(ka_1^2+1))-(1-theta)*log(ka_2^2/(ka_2^2+1))
@@ -8,13 +9,9 @@
 %          Gf:= Gradient
 %          HF:= Hessian
 
-function [f,Gf,Hf]=f_svm_CoDo(x,theta)
-
 C1=theta;
 C2=1-theta;
-if size(x,2)>1
-x=x';
-end
+x=x(:);
 
 n=length(x);
 % Objective function
@@ -30,4 +27,5 @@ Hf=sparse(n,n);
 Hf(n-2,n-2)=0;
 Hf(n-1,n-1)= C1*z1;
 Hf(n,n)= C2*z2;
+
 return

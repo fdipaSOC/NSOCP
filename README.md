@@ -3,10 +3,11 @@
 MATLAB library to find minimum of nonlinear second-order cone programming problem, using the feasible direction interior-point algorithm (fdipa) as presented in [1].
 
 ## Download 
-From a command line:
+Option 1: From a MATLAB command prompt run:
 ```
 git clone https://github.com/fdipaSOC/NSOCP
 ```
+Option 2: run script "fdipa_setup.m" included in the library folder
 
 ## Install in MATLAB
 From a MATLAB command window:
@@ -32,18 +33,19 @@ The scripts are organized in the following folders:
 * `example1_quadratic`: example of application of fdipaQuad to a quadratic problem with linear cone constraints.
 * `example2_kato`: Kato-Fukushima example of for nonlinear second-order cone programs as presented in [2].
 * `example3_miao`: Miao-Chen-Ko example of nonlinear convex programs with second-order cone constraints as presented in [3].
-* `example4_kff_nonlinear`: Example of nonlinear problem with linear constraints used in Example 4.2 of [4] (also  used in Ex. 5.3 of [3]).
+* `example4_hyf_nonlinear`: Example of nonlinear problem with linear constraints used in Example 4.2 of [4] (also  used in Ex. 5.3 of [3]).
 * `example5_dist_ellip`: application of fdipaQuad to the problem of distance between two ellipses.
 * `example6_cubic`: example of cubic objective function with linear constraints.
-* `example7_rotated_conic`: example of a quadratic objective with rotated conic constraints (see documentation for details).
+* `example7_rotated_conic`: example of a quadratic objective with rotated conic constraints.
+* `example8_svm`: Application to support vector machines (Requires CVX).
 
 ## Citing
 This repository has been developed as part of the following article (citation given below). We would appreciate it if you would please cite the following paper if you found the library useful for your work.
 
 ```
-@article{awasthi2023matnli,
+@article{fdipa2024,
     title = {FDIPA-SOC: A Matlab package for nonlinear Second-Order Cone programs},
-    author = {Canelasa, A. and Carrasco, M and L\'opez, J and Paduro, E.},
+    author = {Canelas, A. and Carrasco, M and L\'opez, J and Paduro, E.},
     journal = {2024},
     volume = {},
     pages = {},

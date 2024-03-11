@@ -12,15 +12,18 @@
 %
 disp('Experiment 1, a): using BFGS hessian update');
 x0 = [1;0;0;0;0];
-my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100,...
-    'HessianApproximation','bfgs');
-fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
+my_options = fdipa_options();
+[x,fval,~,output] = fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
+
+fprintf('Experiment 1 & BFGS & %d & %11f & %11.5e & %11f \\\\ \\relax %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
+
 
 disp('Experiment 1, b): using Modified newton hessian update');
-my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100, ...
-    'HessianApproximation','mod-newton','HessianFcn',@hess_update_miao_ex1);
-fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
+my_options = fdipa_options('HessianApproximation', ...
+                    'user-supplied','HessianFcn',@(x_new,x_old,y_new, y_old, fun,gj,hess_old) hess_update_miao_ex1(x_new));
+[x,fval,~,output] = fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
 
+fprintf('Experiment 1 & Modified Newton & %d & %11f & %11.5e & %11f \\\\ \\relax %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
 %% Example 5.2 of [1]
 % $$f(x) = x_1^2+2x_2^2+2x_1x_2-10x_1-12x_2$$
@@ -32,13 +35,15 @@ fdipa(@fun_miao_ex1,x0,@g_miao_ex1,5,[],my_options);
 %
 x0 = [1;0];
 disp('Experiment 2, a): using BFGS Hessian update');
-my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100,...
-    'HessianApproximation','bfgs');
+my_options = fdipa_options();
 fdipa(@fun_miao_ex2,x0,@g_miao_ex2,[],[],my_options);
 
+fprintf(' Experiment 2 & BFGS & %d & %11f & %11.5e & %11f \\\\ \\relax  %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
+
 disp('Experiment 2, b): using modified newton Hessian update');
-my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100, ...
-    'HessianApproximation','mod-newton','HessianFcn',@hess_update_miao_ex2);
+my_options = fdipa_options(...
+    'HessianApproximation','user-supplied','HessianFcn',@(x_new,x_old,y_new,y_old,fun,gj,hess_old) hess_update_miao_ex2(x_new,y_new));
 fdipa(@fun_miao_ex2,x0,@g_miao_ex2,[],[],my_options);
+fprintf(' Experiment 2 & Modified Newton & %d & %11f & %11.5e & %11f \\\\ \\relax %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
 clear 'x0' 'my_options' 

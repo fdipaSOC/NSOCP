@@ -11,7 +11,10 @@
 % Example1: Linear cone contraint Quadratic objective
 
 % Construction of the matrices for the problem
-N=30;
+N=16;
+%N=20;
+%N=35;
+%N=50;
 vertices=[ones(1,N); zeros(N-1,N)];
 x0=10*eye(N);
 x0=reshape(x0,N^2,1);
@@ -31,28 +34,31 @@ for i=1:N
 end
 matQ=N*speye(N^2)-matJ;
 
-my_options = fdipa_options('Display','iter');
-[x,fval,exitflag,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
+my_options = fdipa_options('Display','final');
+[x,fval,exitflag,output,lambda] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
+[~,gradf] = quad_fun(x,matQ,cvec);
+[~,gradg] = linear_constraint_fun(x,matA,b);
 
-% Which is equivalent to an explicit call to fdipa
+fprintf('%d & Exact & %d & %11f & %11.5e & %11f \\\\ %%exact \n',N^2,output.iterations,fval, output.firstorderopt, output.cputime)
 
-problem.objective = @(x) quad_fun(x,matQ,cvec) ;
-problem.x0 = x0;
-problem.y0 = [];
-problem.gj = @(x) linear_constraint_fun(x,matA,b);
-problem.mj = mj;
-my_options.edit('HessianApproximation','user-supplied');
-b_update = @(xnew,xk,grad_xnew, grad_fxk, matB) matQ;
-my_options.edit('HessianFcn',b_update);
-problem.options = my_options;
-[x,fval,exitflag,output] = fdipa(problem);
+% % Which is equivalent to an explicit call to fdipa
+% 
+% problem.objective = @(x) quad_fun(x,matQ,cvec) ;
+% problem.x0 = x0;
+% problem.y0 = [];
+% problem.gj = @(x) linear_constraint_fun(x,matA,b);
+% problem.mj = mj;
+% my_options.edit('HessianApproximation','user-supplied');
+% b_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) matQ;
+% my_options.edit('HessianFcn',b_update);
+% problem.options = my_options;
+% [x,fval,exitflag,output] = fdipa(problem);
 
 % In order to use a different Hessian update we choose the appropriate option
-my_options = fdipa_options('Display','iter','HessianApproximation','bfgs');
+my_options = fdipa_options('Display','final','HessianApproximation','bfgs');
 [x,fval,exitflag,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
+fprintf('%d & BFGS & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',N^2,output.iterations,fval, output.firstorderopt, output.cputime)
 
-
-disp(output)
 
 clear 'b'  'i' 'j' 'matJ' 'matA' 'matAi' 'matQ' 'cvec' 'mj' ...
     'my_options' 'N' 'vertices' 'x0' 'xmin' 'y0' 'problem' 'x' ...

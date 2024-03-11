@@ -1,3 +1,4 @@
+function [f,Gf,Hf]=f_svm_CoDo_L2(x,C1,C2)
 % Function to minimize
 % f(w,b,ka_1,ka_2)=0.5*|w|^2-C1*log(ka_1^2/(ka_1^2+1))-C2*log(ka_2^2/(ka_2^2+1))
 % Input: 
@@ -7,12 +8,7 @@
 %          Gf:= Gradient
 %          HF:= Hessian
 
-function [f,Gf,Hf]=f_svm_CoDo_L2(x,C1,C2)
-
-if size(x,2)>1
-x=x';
-end
-
+x=x(:);
 n=length(x);
 % Objective function
 f=0.5*norm(x(1:n-3))^2-C1*log(x(n-1)^2/(x(n-1)^2+1))-C2*log(x(n)^2/(x(n)^2+1));

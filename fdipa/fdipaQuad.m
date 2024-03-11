@@ -1,5 +1,5 @@
 function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
-    = fdipaQuad(Q,c,A,b,x0,mj,y0,myoptions,useCustomHessian)
+    = fdipaQuad(Q,c,A,b,x0,mj,y0,myoptions)
 % This handler uses FDIPA to attempt to find a minimum of a 
 % quadratic objective funcion with linear inequality constrains. 
 % More specifically we solve for
@@ -24,30 +24,31 @@ function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
 %  - y0: initial feasible value for the lagrange multipliers, can be set to [].
 %  - myoptions: Additional options passed to the solver. If empty default 
 %        options are assumed. 
-%  - useCustomHessian: Indicate if the exact hessian must be used, by default 
-%        is true. In order to use a different Hessian (for instance BFGS) the 
-%        'Hessian' option must be selected in myoptions and useCustomHessian 
-%        must be set to false.
 %
 % OUTPUTS:
 %  - x: argmin(fun)
 %  - fval: Value of fun at the solution x.
 %  - exitflag: Indicator of the status of the execution, has the value 0 
 %              in successful.
-%  - output: A structure with information about the optimization. The 
-%            fields of the structure are the following:
-%        output.iterations: Number of iterations taken
-%        output.constrviolation: Maximun of constraint functions
-%        output.stepsize: Length of last displacement in x
-%        output.firstorderopt: Measure of first-order optimality
-%        output.message: Exit message
+%  - output:    - iterations:  Number of iterations taken
+%               - cputime: Time used by the algorithm's execution.
+%               - constrviolation:  A measure of how well the constraints are 
+%               satisfied. A positive value indicates that all inequality 
+%               constraints are satisfied strictly, and a negative value 
+%               indicates that some of the constraints are violated by that 
+%               amount.
+%               - firstorderopt: Norm of the Lagrangian
+%               - bestfeasible: Best solution found before the a stop 
+%               condition is satisfied.
+%               - stepsize: Length of last displacement in x.
+%               - message: Exit message
 %  - lambda: Structure with fields containing the Lagrange multipliers at 
 %        the solution x
 %  - grad: Gradient of Lagrangian at the solution x.
 %  - hessian: Hessian of Lagrangian at the solution x.
 %
 % USAGE:
-%   x = fdipaQuad(Q,c,A,b,x0,mj,y0,myoptions,useCustomHessian)
+%   x = fdipaQuad(Q,c,A,b,x0,mj,y0,myoptions)
 %   
 %   [x,fval] = fdipaQuad(...)
 %   [x,fval,exitflag] = fdipaQuad(...)
@@ -65,10 +66,7 @@ function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
             mj = length(x0);
         end
         if nargin < 8
-            myoptions = options_class();
-        end
-        if nargin < 9
-            useCustomHessian = false;
+            myoptions = fdipa_options();
         end
     else 
         error('fdipaQuad:Not enough input arguments')
@@ -77,9 +75,9 @@ function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
     x0 = x0(:);
     b = b(:); 
     c = c(:);
-    if !useCustomHessian
+    if strcmp(myoptions.HessianApproximation,'default')
         myoptions.edit('HessianApproximation','user-supplied');
-        b_update = @(xnew,xk,grad_xnew, grad_fxk, matB) Q;
+        b_update = @(x_new,x_old,y_new,y_old,fun,gj, hess_old) Q;
         myoptions.edit('HessianFcn',b_update);
     end
     

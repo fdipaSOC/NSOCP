@@ -5,8 +5,7 @@ function [g,Gradg]=g_svm(x,mu,Mchol_1,Mchol_2)
 %   kappa_1 >=0
 %   kappa_2 >=0
 
-
-if size(x,2)>1,x=x';end
+x=x(:);
 n=size(mu,2);
 
 g1=[mu(1,:)*x(1:n)+x(n+1)-1;x(n+2)*Mchol_1'*x(1:n)];

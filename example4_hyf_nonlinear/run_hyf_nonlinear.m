@@ -24,12 +24,11 @@ x0 = {[1 ;0 ;0] ,  ...
       [3.2266;-0.7353;-1.5477] , ...
       [3.7282;0.2875;0.2737] };
 mj = [2;3]; 
-my_options = fdipa_options('Display','iter','ConstraintTolerance',1e-15, ...
-    'MaxIterations',300,'HessianApproximation','bfgs');
 
-for i = 1:5
-   fdipa(@fun_hyf,x0{i},@g_hyf,mj,[],my_options);
-end
+%my_options = fdipa_options('Display','iter','ConstraintTolerance',1e-15);
+%for i = 1:5
+%   fdipa(@fun_hyf,x0{i},@g_hyf,mj,[],my_options);
+%end
 
 x0 = x0{2};
 
@@ -37,17 +36,12 @@ disp('Experiment 1: default options')
 [~,fval,~,output] = fdipa(@fun_hyf,x0,@g_hyf,mj);
 fprintf(' %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
-
-disp('Experiment 3: BFGS hessian update and constraint tolerance 10^(-12)')
-my_options = fdipa_options('ConstraintTolerance',10^(-12),'HessianApproximation','bfgs');
+disp(strcat('Experiment 2: using modified Newton Hessian update'));
+hess_update= @(x_new,x_old,y_new,y_old,fun,gj,hess_old) hess_update_hyf(x_new);
+my_options = fdipa_options('MaxIterations',100, ...
+    'HessianApproximation','user-supplied','HessianFcn',hess_update);
 [x,fval,exitflag,output] = fdipa(@fun_hyf,x0,@g_hyf,mj,[],my_options);
 fprintf('%d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
-
-disp(strcat('Experiment 4: using modified Newton Hessian update and ',...
-    'constraint tolerance 10^(-12)'));
-my_options = fdipa_options('ConstraintTolerance',1e-12,'MaxIterations',100, ...
-    'HessianApproximation','mod-newton','HessianFcn',@hess_update_hyf);
-fdipa(@fun_hyf,x0,@g_hyf,mj,[],my_options);
 
 clear 'x0' 'mj' 'my_options' 'i';
 

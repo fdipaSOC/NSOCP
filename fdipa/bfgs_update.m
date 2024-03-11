@@ -1,18 +1,31 @@
-function hess = bfgs_update(xnew, x, grad_xnew, grad_x, hess)
+function hess = bfgs_update(x_new, x_old, y_new, y_old, fun, gj,hess_old)
+%	grad_x_new, grad_x_old
 % BFGS formula with the Han-Powell modification [1] Section 14.7
 % INPUTS:
-%   - xnew: point at which the updated hessian is needed.
-%   - x: initial point at which the hessian is given.
-%   - grad_xnew: gradient of the function at the point xnew.
-%   - grad_x: gradient of the function at the point x.
-%   - hess: hessian matrix at the point x.
+%   - x_new: point at which the updated hessian is needed.
+%   - x_old: initial point at which the hessian is given.
+%   - y_new: lagrange multiplier at next iteration.
+%   - y_old: lagrange multiplier at current iteration.
+%   - fun:   handle to the objective function
+%   - gj:    handle to the constraint function
+%   - hess_old: hessian matrix at the point x.
 % OUTPUTS:
 %   - hess: approximate hessian matrix given by the BFGS method
 % [1] D.G. Luenberger.Linear  and  Nonlinear  Programming:  Second  Edition.  Springer,2003.
 
-	u = xnew-x; 
-	v = grad_xnew-grad_x; 
-	z = hess*u; 
+    [~,grad_f_old] = fun(x_old); 
+    grad_f_old = grad_f_old(:);
+    [~,grad_g_old] = gj(x_old); 
+    grad_x_old=grad_f_old -grad_g_old'*y_new;
+    
+	[~,grad_f_new] = fun(x_new);
+    grad_f_new = grad_f_new(:);
+    [~,grad_g_new] = gj(x_new);
+    grad_x_new=grad_f_new -grad_g_new'*y_new;
+
+	u = x_new-x_old; 
+	v = grad_x_new-grad_x_old; 
+	z = hess_old*u; 
 
     % theta parameter
 	alpha = 0.2;
@@ -22,8 +35,8 @@ function hess = bfgs_update(xnew, x, grad_xnew, grad_x, hess)
 		theta = (1-alpha)*(u'*z)/(u'*z - u'*v);
 	end
 	r = theta*v + (1-theta)*z;
-	gamma = (u'*r)/(u'*hess*u);
-	hess = gamma*hess;
+	gamma = (u'*r)/(u'*hess_old*u);
+	hess = gamma*hess_old;
 
 	% update step
 	z = hess*u;

@@ -31,7 +31,6 @@ function arrz=arrow(z,mj)
         case 2
             if sum(mj)~=m
                 error('fdipa:arrow: Dimension missmatch,  mj(end) != len(z).');
-                return
             else
                 % transpose mj into a column vector if needed
                 mj = mj(:);
@@ -53,6 +52,5 @@ function arrz=arrow(z,mj)
             end
         otherwise
             error('fdipa:arrow: Wrong number of inputs'); 
-            return
     end
 end

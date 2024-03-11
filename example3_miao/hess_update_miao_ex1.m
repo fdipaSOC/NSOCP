@@ -1,4 +1,4 @@
-function B = hess_update_miao_ex1(xkyk) 
+function B = hess_update_miao_ex1(x) 
 % Modified Newton Hessian update
 % for the Miao-Chen-Ko example of nonlinear convex programs with 
 % second-order cone constraints as presented in [1]
@@ -7,10 +7,10 @@ function B = hess_update_miao_ex1(xkyk)
 % network for solving nonlinear convex programs with second-order cone 
 % constraints, Information Sciences, Volume 268, 2014, p 255-270, 
 % https://doi.org/10.1016/j.ins.2013.10.017
-    xkyk = xkyk(:);
-    
+    %xkyk = xkyk(:);
+    %x= xkyk(1:n);
     n = 5;
-    x= xkyk(1:n);
+    x= x(:);
     B = zeros(n,n);
     f = fun_miao_ex1(x);
     x_aux = [x(1)-3;x(2);x(3)-1;x(4)-2;x(5)+1];

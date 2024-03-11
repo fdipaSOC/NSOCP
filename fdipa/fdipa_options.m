@@ -4,10 +4,12 @@ function optobj = fdipa_options(varargin)
 %   - varargin: Any number of arguments, separated by comma, indicating the 
 %               options used in the execution of fdipa. the format is:
 %               'nameOption1',valueOption1,'nameOption2',valueOption2,...
-%               Valid options are the following: Display, SpecifyConstraintGradient, 
-%               SpecifyObjectiveGradient, MaxIterations, ConstraintTolerance, 
+%               Valid options are the following: Display, MaxIterations, 
 %               OptimalityTolerance, StepTolerance, HessianFcn, HessianApproximation, 
-%               ParXi, ParEta, ParNu, ParPhi, ParCI, ParCS, ParLambdam. See documentation for details.
+%               HessianResetIterations, ParXi, ParEta, ParNu, 
+%               ParPhi, ParCI, ParCS, ParLambdam, ParSigma2, NumericalConditioning
+% 
+% . See documentation for details.
 % OUTPUT: 
 %   - optobj: object of class optionsClass with the configuration for the execution of fdipa
 %
@@ -26,14 +28,15 @@ function optobj = fdipa_options(varargin)
             switch varargin{2*(k-1)+1}
                 case 'Display'
                     msj=optobj.edit('Display',varargin{2*k});
-                case 'SpecifyConstraintGradient'   %ignored, gradient of constraint is required
-                    msj=optobj.edit('SpecifyConstraintGradient',varargin{2*k});
-                case 'SpecifyObjectiveGradient'      
-                    msj=optobj.edit('SpecifyObjectiveGradient',varargin{2*k}) ;
+%                case 'SpecifyConstraintGradient'   %ignored, gradient of constraint is required
+%                    msj=optobj.edit('SpecifyConstraintGradient',varargin{2*k});
+%                case 'SpecifyObjectiveGradient'   %ignored, gradient of constraint is required   
+%                    msj=optobj.edit('SpecifyObjectiveGradient',varargin{2*k}) ;
                 case 'MaxIterations'      
                     msj=optobj.edit('MaxIterations',varargin{2*k}) ;
-                case 'ConstraintTolerance'       
-                    msj=optobj.edit('ConstraintTolerance',varargin{2*k}) ;
+% This parameter only make sense for equality contraints
+%                case 'ConstraintTolerance'       
+%                    msj=optobj.edit('ConstraintTolerance',varargin{2*k}) ;
                 case 'OptimalityTolerance'       
                     msj=optobj.edit('OptimalityTolerance',varargin{2*k}) ;
                 case 'StepTolerance'         
@@ -42,6 +45,8 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('HessianFcn',varargin{2*k}) ;
                 case 'HessianApproximation'      
                     msj=optobj.edit('HessianApproximation',varargin{2*k}) ;
+                case 'HessianResetIterations'      
+                    msj=optobj.edit('HessianResetIterations',varargin{2*k}) ;                    
                 case 'ParXi'        
                     msj=optobj.edit('ParXi',varargin{2*k}) ;
                 case 'ParEta' %Armijo parameter for the line search 
@@ -56,8 +61,12 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('ParCS',varargin{2*k}) ;
                 case 'ParLambdam'       
                     msj=optobj.edit('ParLambdam',varargin{2*k}) ;
+                case 'ParSigma2'       
+                    msj=optobj.edit('ParSigma2',varargin{2*k}) ;
+                case 'NumericalConditioning'       
+                        msj=optobj.edit('NumericalConditioning',varargin{2*k}) ;
                 otherwise 
-                    disp('The indicated variable does not belong to the set of options');
+                    warning('The indicated variable does not belong to the set of options');
                     return      
             end
         end

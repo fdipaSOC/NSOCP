@@ -1,15 +1,11 @@
-function B = hess_update_kff(xkyk) 
-% Modified Newton Hessian update for the Kanzow-Ferenczi-Fukushima 
-% example of nonlinear convex programs with 
-% second-order cone constraints as presented in [1]
-% [1] C. Kanzow, I. Ferenczi, and M. Fukushima. On the local convergence 
-% of semismooth newton methods for linear and nonlinear second-order 
-% cone programs without  strict complementarity. 
-% SIAM J. Optim., % 20(1):297-320, 2009.
-% https://doi.org/10.1137/060657662
-    xkyk = xkyk(:);
+function B = hess_update_hyf(x) 
+% Modified Newton Hessian update for Examples as used in [1]
+% [1] S. Hayashi, N. Yamashita, and M. Fukushima. A Combined Smoothing
+% and Regularization Method for Monotone Second-Order Cone 
+% Complementarity Problems. 
+% SIAM Journal on Optimization, 15(2):593–615, 2005
     n = 3;
-    x= xkyk(1:n);
+    x= x(1:n);
     B = zeros(n,n);
     
     B(1,1) = exp(x(1)-x(3))+144*(2*x(1)-x(2))^2;

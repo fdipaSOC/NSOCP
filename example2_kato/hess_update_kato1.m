@@ -1,4 +1,4 @@
-function B = hess_update_kato1(xkyk,C,d) 
+function B = hess_update_kato1(x_new,C,d) 
 % Hessian update for the Kato-Fukushima example of 
 % for nonlinear second-order cone programs as presented in [1] 
 % Experiment 1
@@ -8,9 +8,9 @@ function B = hess_update_kato1(xkyk,C,d)
 %
 % Custom Hessian update for experiment 1
 
-    xkyk =  xkyk(:);
-    n = length(C);
-    x= xkyk(1:n);
+    x =  x_new(:);
+    %n = length(C);
+    %x= xkyk(1:n);
     B = C+ 12*diag((d.*(x.^2)));
     epsilon = min(eig(B));
     if epsilon <= 0.0
