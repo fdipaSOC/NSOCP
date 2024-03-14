@@ -7,7 +7,8 @@ function optobj = fdipa_options(varargin)
 %               Valid options are the following: Display, MaxIterations, 
 %               OptimalityTolerance, StepTolerance, HessianFcn, HessianApproximation, 
 %               HessianResetIterations, ParXi, ParEta, ParNu, 
-%               ParPhi, ParCI, ParCS, ParLambdam, ParSigma2, NumericalConditioning
+%               ParPhi, ParCI, ParCS, ParLambdam, ParSigma1, ParSigma2, NumericalConditioning
+%               LinearSystemTolerance
 % 
 % . See documentation for details.
 % OUTPUT: 
@@ -61,10 +62,14 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('ParCS',varargin{2*k}) ;
                 case 'ParLambdam'       
                     msj=optobj.edit('ParLambdam',varargin{2*k}) ;
+                case 'ParSigma1'       
+                    msj=optobj.edit('ParSigma1',varargin{2*k}) ;
                 case 'ParSigma2'       
                     msj=optobj.edit('ParSigma2',varargin{2*k}) ;
                 case 'NumericalConditioning'       
-                        msj=optobj.edit('NumericalConditioning',varargin{2*k}) ;
+                    msj=optobj.edit('NumericalConditioning',varargin{2*k}) ;
+                case 'LinearSystemTolerance'       
+                    msj=optobj.edit('LinearSystemTolerance',varargin{2*k}) ;
                 otherwise 
                     warning('The indicated variable does not belong to the set of options');
                     return      

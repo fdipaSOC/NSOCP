@@ -19,8 +19,10 @@ classdef options_class < handle
         ParCI;
         ParCS;
         ParLambdam;
+        ParSigma1;
         ParSigma2;
         NumericalConditioning;
+        LinearSystemTolerance;
     end
    
     methods
@@ -43,8 +45,10 @@ classdef options_class < handle
             opt.ParCI= 1e-9;
             opt.ParCS = 1e9;
             opt.ParLambdam = 1e-4;
+            opt.ParSigma1 = 1e-15;
             opt.ParSigma2 = 1e15;
             opt.NumericalConditioning = 1e15;
+            opt.LinearSystemTolerance = 1e-4;
         end
       
         function status = edit(opt,varName,value) 
@@ -251,6 +255,16 @@ classdef options_class < handle
                     else
                         status=2;
                     end
+                case 'ParSigma1'
+                        if isnumeric(value)==1
+                            if min(value)>0
+                                opt.ParSigma1 = value;
+                            else
+                                status=3;
+                            end
+                        else
+                            status=2;
+                        end 
                 case 'ParSigma2'
                     if isnumeric(value)==1
                         if min(value)>0
@@ -270,7 +284,17 @@ classdef options_class < handle
                         end
                     else
                         status=2;
-                    end 
+                    end
+                case 'LinearSystemTolerance'
+                        if isnumeric(value)==1
+                            if min(value)>0
+                                opt.LinearSystemTolerance = value;
+                            else
+                                status=3;
+                            end
+                        else
+                            status=2;
+                        end  
                 otherwise
                     status=0;
             end

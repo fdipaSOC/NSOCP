@@ -34,14 +34,14 @@ x0 = x0{2};
 
 disp('Experiment 1: default options')
 [~,fval,~,output] = fdipa(@fun_hyf,x0,@g_hyf,mj);
-fprintf(' %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
+fprintf('%d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
 disp(strcat('Experiment 2: using modified Newton Hessian update'));
 hess_update= @(x_new,x_old,y_new,y_old,fun,gj,hess_old) hess_update_hyf(x_new);
 my_options = fdipa_options('MaxIterations',100, ...
     'HessianApproximation','user-supplied','HessianFcn',hess_update);
 [x,fval,exitflag,output] = fdipa(@fun_hyf,x0,@g_hyf,mj,[],my_options);
-fprintf('%d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
+fprintf('%d & %11f & %11.5e & %11f \\\\ mod-newtonBFGS \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
 clear 'x0' 'mj' 'my_options' 'i';
 

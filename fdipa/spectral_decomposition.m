@@ -23,8 +23,6 @@ function [lambda1,lambda2,u1,u2]=spectral_decomposition(w_vec,mj)
 %  - u2: second vector of the spectral decomposition
 %
 % USAGE:
-%   [lambda1,lambda2,u1,u2] = spectral_decomposition([3,1;-2])
-%   [lambda1,lambda2,u1,u2] = spectral_decomposition(fun,x0,y0,[gj])
     if length(w_vec) == 1
         u1 = 1;
         u2 = 0;

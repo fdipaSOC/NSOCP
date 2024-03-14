@@ -10,7 +10,7 @@
 
 
 seed = RandStream('mt19937ar','Seed',1);
-m=10;
+m=1000      0;
 a = 10*rand(seed);
 b = 10*rand(seed);
 c = -1+ 2*rand(seed,m,1);

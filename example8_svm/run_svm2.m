@@ -13,10 +13,10 @@
 % Markelle Kelly, Rachel Longjohn, Kolby Nottingham,
 % The UCI Machine Learning Repository, https://archive.ics.uci.edu
 
-load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat'])
-%load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat'])
-%load([fileparts(mfilename('fullpath')),'\dataset_Class\german_credit.mat'])
-%load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat'])
+%load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat'])
+load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat'])
+load([fileparts(mfilename('fullpath')),'\dataset_Class\german_credit.mat'])
+load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat'])
 
 %data files contains arrays X containing the information asociated with
 %each measurement, and an array Y indicating the 
@@ -34,13 +34,15 @@ mj=[n+1;n+1;1;1];
 %nu=[0.005;0.01];
 
 maxiter = 30;
-report = zeros(10,5);
+report = zeros(maxiter,8);
 
 %Experiment 2: Logarithmic objective with L2 regularization
 disp('Experiment 2: Logarithmic objective with L2 regularization and weights C1=C2=1, BFGS');
 %use BFGS hessian update for the optimzation
-myoptions = fdipa_options('NumericalConditioning',1e15);
-C1=1; C2=1;
+myoptions = fdipa_options('NumericalConditioning',1e15, ...
+    'OptimalityTolerance', 1e-6, ...
+    'StepTolerance', 1e-10);
+C1=100; C2=100;
 fun=@(x)f_svm_CoDo_L2(x,C1,C2);
 const=@(x)g_svm(x,mu,Mchol_1,Mchol_2);
 
@@ -62,9 +64,9 @@ for iter=1:maxiter
     [x,fval,~,output]=fdipa(fun,x0,const,mj,[],myoptions);
     kappa_opt=x(n+2:end);
     eta_opt=kappa_opt.^2./(1+kappa_opt.^2);    
-    report(iter,:) = [output.iterations, output.cputime, fval,eta_opt(1),eta_opt(2)];
+    report(iter,:) = [output.iterations, output.cputime, fval,output.firstorderopt , output.compslack,output.constrviolation,eta_opt(1),eta_opt(2)];
     fprintf('%d & %d & %11f & %11.5e & %11f & %11.5f & %11.5f \\\\ \n',m, output.iterations,fval, output.firstorderopt, output.cputime,eta_opt(1),eta_opt(2))
-  
+   
     % kappa_opt=x(n+2:end);
     % Eta_opt=kappa_opt.^2./(1+kappa_opt.^2);
     % fprintf('kappa_opt: %f \n',kappa_opt)
@@ -87,9 +89,10 @@ max_report = max(report);
 min_report = min(report);
 mean_report = mean(report);
 array2table([max_report; min_report;mean_report] ,...
-    'VariableNames',{'iterations','time','fval','eta1', 'eta2'},...
+    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2'},...
     'RowNames',{'max','min','mean'})
 
-fprintf("{\\bf ds1} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & &  & 0 \\\\\n", ...
-mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,3))
+fprintf("{\\bf ds1} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e & %11.5e \\\\\n", ...
+mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,8),report(1,4),max_report(1,5),max_report(1,6))
+
 

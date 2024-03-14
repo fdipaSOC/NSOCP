@@ -5,7 +5,7 @@
 % constraints, Information Sciences, Volume 268, 2014, p 255-270, 
 % https://doi.org/10.1016/j.ins.2013.10.017
 
-%% Example 5.1 of [1]
+% Example 5.1 of [1]
 % $$f(x) = \exp((x_1-3)^2+x_2^2+(x_3-1)^2+(x_4-2)^2+(x_5+1)^2)$$
 %
 % $$g(x)=x\in\mathcal{K}^5$$
@@ -25,7 +25,7 @@ my_options = fdipa_options('HessianApproximation', ...
 
 fprintf('Experiment 1 & Modified Newton & %d & %11f & %11.5e & %11f \\\\ \\relax %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.cputime)
 
-%% Example 5.2 of [1]
+% Example 5.2 of [1]
 % $$f(x) = x_1^2+2x_2^2+2x_1x_2-10x_1-12x_2$$
 %
 % $$g(x)=\left[\begin{array}{c}

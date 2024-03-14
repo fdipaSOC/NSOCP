@@ -16,9 +16,9 @@ mj=[10;10;20;20;10];
 mj=[10;10;20;20;20;20];
 mj=[20;20;30;30;20;30;10];
 mj=[30;30;40;40;30;30;40];
-mj=[40;40;50;50;50;40;30;40];
-mj=[50;60;70;70;50;60;60;60];
-mj=[60;70;70;70;60;70;60;70;50];
+%mj=[40;40;50;50;50;40;30;40];
+%mj=[50;60;70;70;50;60;60;60];
+%mj=[60;70;70;70;60;70;60;70;50];
 %mj=[80;90;90;90;80;100;80;70;60];
 
 n = sum(mj);
@@ -57,7 +57,9 @@ while(min(lamb_min) < default_options.StepTolerance(1))
 end
 
 disp('experiment 2a: Hessian update bfgs');
-my_options = fdipa_options('Display', 'final','MaxIterations',5000);
+my_options = fdipa_options('Display', 'final','MaxIterations',5000, ...
+    'StepTolerance',1e-13);
+    %% 
 [~,fval,~,output]=fdipa(@(x)fun_kato2(x,C,d,e,f),x0,@(x)g_kato2_nlin(x,a1,a2,b), ...
     mj,y0,my_options);
 fprintf('[');
