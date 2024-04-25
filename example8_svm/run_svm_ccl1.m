@@ -1,3 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Requires CVS for matlab [1]
 % [1] Michael Grant and Stephen Boyd. CVX: Matlab software for disciplined 
 % convex programming, version 2.0 beta. 
@@ -13,7 +21,7 @@
 % Markelle Kelly, Rachel Longjohn, Kolby Nottingham,
 % The UCI Machine Learning Repository, https://archive.ics.uci.edu
 load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat'])
-load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat'])
+%load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat'])
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\german_credit.mat'])
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat'])
 
@@ -28,7 +36,7 @@ seed = RandStream('mt19937ar','Seed',1);
 
 [mu,Mchol_1,Mchol_2]=split_chol(X,Y);
 mj=[n+1;n+1;1;1;1];
-maxiter = 10;
+maxiter = 20;
 report = zeros(maxiter,7);
 C=0.25;
 

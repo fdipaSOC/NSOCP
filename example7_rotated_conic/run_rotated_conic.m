@@ -1,13 +1,12 @@
-% Example: Quadratic objective with rotated conic constraint
-%
-% FDIPA : feasible directioninterior-point algorithm. See [1] for details
-%
-% The algorithm follows closely [1] page 1330.
-% [1] Alfredo Canelas, Miguel Carrasco & Julio Lopez (2019) A feasible 
-%     direction algorithm for nonlinear second-order cone programs, 
-%     Optimization Methods and Software, 34:6, 1322-1341, 
-%     DOI: 10.1080/10556788.2018.1506452
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Example 7: Quadratic objective with rotated conic constraint
 
 seed = RandStream('mt19937ar','Seed',1);
 m=1000      0;

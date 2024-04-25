@@ -1,5 +1,12 @@
-%CLASS OPTIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef options_class < handle
+%CLASS OPTIONS
     properties 
         Display; %indicates how much information will be shown
         %SpecifyConstraintGradient; % UNUSED

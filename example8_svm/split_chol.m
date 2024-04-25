@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [mu,Mchol_1,Mchol_2]=split_chol(X,Y)
 % Separates the data using the given classifications,
 % Measure something and perform a Cholesky factorization

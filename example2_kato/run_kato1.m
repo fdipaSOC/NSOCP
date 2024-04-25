@@ -1,3 +1,11 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Example 2. Kato-Fukushima example of for nonlinear second-order
 % cone programs as presented in [1]
 % Experiment 1: Linear constraint
@@ -9,14 +17,14 @@
 seed = RandStream('mt19937ar','Seed',1);
 
 % choice of cones for the example
-%mj= [5;5];
+mj= [5;5];
 %mj= [5;5;20];
 %mj=[5;5;20;20];
 %mj=[10;10;20;20;10];
 %mj=[10;10;20;20;20;20];
 %mj=[20;20;30;30;20;30;10];
 %mj=[30;30;40;40;30;30;40];
-mj=[40;40;50;50;50;40;30;40];
+%mj=[40;40;50;50;50;40;30;40];
 %mj=[50;60;70;70;50;60;60;60];
 %mj=[60;70;70;70;60;70;60;70;50];
 %mj=[80;90;90;90;80;100;80;70;60];
@@ -41,21 +49,12 @@ for i=1:nCones
 end
 y0 =b;
 
-% generate random initial data until a feasible starting condition is found
-t = 1;
-x0 = (-1+2*rand(seed,n,1))*t;
-%a negative value of lamb_min means that the initial data is unfeasible
-lamb_min = spectral_decomposition(g_kato1_lin(x0,A,b),mj);
-
-while(min(lamb_min) < 0)
-   t = 0.8*t;
-   x0 = (-1+2*rand(seed,n,1))*t;
-   lamb_min = spectral_decomposition(g_kato1_lin(x0,A,b),mj);
-end
+x0 = zeros(n,1);
 
 disp('experiment 1a: Hessian update BFGS (default) ');
 my_options = fdipa_options('Display', 'final');
 [x,fval,~,output] =fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
+%Output for paper
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
@@ -66,6 +65,7 @@ hess_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) hess_update_kato1
 my_options = fdipa_options('Display', 'final',...
     'HessianApproximation','user-supplied','HessianFcn',hess_update);
 [x,fval,~,output]=fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
+%Output for paper
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));

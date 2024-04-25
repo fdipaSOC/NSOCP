@@ -1,17 +1,24 @@
-function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
-% FDIPA : feasible direction interior-point algorithm
-% as presented in [1]. This is an extension to NSOCP of the feasible 
-% direction interior-point algorithm (FDIPA) proposed by Herskovits 
-% in [2] for smooth constrained nonlinear programming (NP).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FDIPA : feasible direction interior-point algorithm. 
+% The details of this particular implementation are contained in [1]. 
+% The algorithm was first presented in [2, page 1330]. This is an extension 
+% to NSOCP of the feasible direction interior-point algorithm (FDIPA) 
+% proposed by Herskovits in [2] for smooth constrained nonlinear programming (NP).
 %
-% The algorithm follows closely [1] page 1330.
-% [1] Alfredo Canelas, Miguel Carrasco & Julio Lopez (2019) A feasible 
+% This package has been download from https://github.com/fdipaSOC/NSOCP
+% See README.md for details.
+% 
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+% [2] Alfredo Canelas, Miguel Carrasco, Julio Lopez (2019) A feasible 
 %     direction algorithm for nonlinear second-order cone programs, 
 %     Optimization Methods and Software, 34:6, 1322-1341, 
 %     DOI: 10.1080/10556788.2018.1506452
-% [2] J. Herskovits, Feasible direction interior-point technique for 
+% [3] J. Herskovits, Feasible direction interior-point technique for 
 %     nonlinear optimization, J. Optim. TheoryAppl. 99 (1998), pp. 121–146.
-% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
+% FDIPA : feasible direction interior-point algorithm
 % fdipa attempts to find a minimum of a scalar function with 
 % second order cone constraints, starting at an initial estimate.
 %
@@ -84,11 +91,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 %   [x,fval,exitflag,output,lambda] = fdipa(...)
 %   [x,fval,exitflag,output,lambda,grad] = fdipa(...)
 %   [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(...)
-%
-% See ./documentation/doc_fdipa.pdf for details
-% 
 
-    %t0 = cputime;
     tic
     exitflag = 0;
     % verification for the number of arguments is correct
@@ -328,7 +331,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         arrw_y=arrow(yk,mj); % Arrow matrix of yk
         arrw_g=arrow(gxk,mj); % Arrow matrix of gj(xk)      
 
-        is_linear_system_solved = false;
+        %is_linear_system_solved = false;
         % Solving system for (da, ya)
         [daya,rcond1]=linsolve([matB -grad_gxk'; arrw_y*grad_gxk arrw_g],[-grad_fxk; zeros(sum(mj),1)]);
         da = daya(1:dimx);
@@ -340,10 +343,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         
         %check if solution of the linear systems is accurate
         if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
-            if norm([matB -grad_gxk'; arrw_y*grad_gxk arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
-                && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance
-                is_linear_system_solved = true;
-            end
+            is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
+                && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
+            %norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
+            %norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
         else
             is_linear_system_solved = true;
         end        
@@ -361,10 +364,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             yb = arrw_inv_g *(yk - matM2 * db );
             %check if solution of the linear systems is accurate
             if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
-                if norm([matB -grad_gxk'; arrw_y*grad_gxk arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
-                    && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance
-                    is_linear_system_solved = true;
-                end
+                is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
+                    && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
+                %norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
+                %norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
             else
                 is_linear_system_solved = true;
             end 
@@ -385,10 +388,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             yb = arrw_inv_g *(yk - matM2 * db );
             %check if solution of the linear systems is accurate
             if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
-                if norm([matB -grad_gxk'; arrw_y*grad_gxk arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
-                    && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance
-                    is_linear_system_solved  =true;
-                end
+                is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
+                    && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
+                norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
+                norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
             else
                 is_linear_system_solved = true;
             end            
@@ -428,8 +431,10 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             = spectral_decomposition(gxk,mj);
 
         first_armijo_iteration = true;
+        % armijo_iter = 1;
         while first_armijo_iteration || (~has_enough_descend)||(~is_feasible) ...
                 ||(~satisfy_spectral_condition)
+            % armijo_iter = armijo_iter + 1;
             if first_armijo_iteration
                 first_armijo_iteration = false;
             else
@@ -496,12 +501,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         end
         
         % Update Bk
-        % if mod(k+1,options.HessianResetIterations)==0
-        %     matB = eye(dimx);
-        %     %fprintf('reset iteration')
-        % else
-        %     matB = b_update(xnew,xk,ynew,yk,fun,gj, matB);
-        % end 
         matB = b_update(xnew,xk,ynew,yk,fun,gj, matB);
 
         % To verify Assumtion 3.5 in [1] we compute the largest singular 

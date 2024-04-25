@@ -1,10 +1,13 @@
-%% Instances of FDIPA for solving nonlinear SOCP problems of the form: 
-%  min f(x); 
-%  s.t. g^j(x)=A^jx+b^j in K^{mj}, j=1,...,J
-%  where
-%   f:R^n-->R,  A^j in R^{mj x n}, b^j in R^{mj}   
-%
-% Examples as used in [1]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This package has been downloaded from https://github.com/fdipaSOC/NSOCP
+% This example is included in the as an application of the algorithm described 
+% in [1]. See README.md for details.
+% [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
+%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Example 4. Hayashi, Yamashita, Fukushima example of nonlinear 
+% convex programs with second-order cone constraints as presented in [1]
 % [1] S. Hayashi, N. Yamashita, and M. Fukushima. A Combined Smoothing
 % and Regularization Method for Monotone Second-Order Cone 
 % Complementarity Problems. 
