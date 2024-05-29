@@ -3,7 +3,7 @@
 % This example is included in the as an application of the algorithm described 
 % in [1]. See README.md for details.
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
     = fdipaQuad(Q,c,A,b,x0,mj,y0,myoptions)
@@ -86,6 +86,13 @@ function [x,fval,exitflag,Output,Lambda,grad,hessian] ...
         myoptions.edit('HessianApproximation','user-supplied');
         b_update = @(x_new,x_old,y_new,y_old,fun,gj, hess_old) Q;
         myoptions.edit('HessianFcn',b_update);
+        %check if the matrix is positive definite
+        try chol(Q);
+        catch 
+            %if cholesky factorization fails indicates that matB is not positive definite.
+            warning("The matrix Q is not positive definite, B^k = I will be used")
+        end
+
     end
     
     [x,fval,exitflag,Output,Lambda,grad,hessian] ...

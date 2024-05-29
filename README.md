@@ -30,21 +30,24 @@ The scripts are organized in the following folders:
   * `fdipa/fdipa.m`: solves a random linear programming problem using either interface.
   * `fdipa/fdipaQuad.m`: solves a random linear programming problem using either interface.
 * `documentation`: source files for the documentation
-* `example1_quadratic`: example of application of fdipaQuad to a quadratic problem with linear cone constraints.
-* `example2_kato`: Kato-Fukushima example of for nonlinear second-order cone programs as presented in [2].
-* `example3_miao`: Miao-Chen-Ko example of nonlinear convex programs with second-order cone constraints as presented in [3].
-* `example4_hyf_nonlinear`: Example of nonlinear problem with linear constraints used in Example 4.2 of [4] (also  used in Ex. 5.3 of [3]).
-* `example5_dist_ellip`: application of fdipaQuad to the problem of distance between two ellipses.
+* `example1_dist_ellip`: application of fdipaQuad to the problem of distance between two ellipses.
+* `example2_rotated_conic`: example of a quadratic objective with rotated conic constraints.
+* `example3_quadratic`: example of application of fdipaQuad to a quadratic problem with linear cone constraints.
+* `example4_miao`: Miao-Chen-Ko example of nonlinear convex programs with second-order cone constraints as presented in [3].
+* `example5_hyf_nonlinear`: Example of nonlinear problem with linear constraints used in Example 4.2 of [4] (also  used in Ex. 5.3 of [3]).
+* `example6_kato`: Kato-Fukushima example of for nonlinear second-order cone programs as presented in [2].
+* `example7_svm`: Application to support vector machines (Requires CVX).
+# Additional examples
 * `example6_cubic`: example of cubic objective function with linear constraints.
-* `example7_rotated_conic`: example of a quadratic objective with rotated conic constraints.
-* `example8_svm`: Application to support vector machines (Requires CVX).
+
+
 
 ## Citing
 This repository has been developed as part of the following article (citation given below). We would appreciate it if you would please cite the following paper if you found the library useful for your work.
 
 ```
 @article{fdipa2024,
-    title = {FDIPA-SOC: A Matlab package for nonlinear Second-Order Cone programs},
+    title = {FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs},
     author = {Canelas, A. and Carrasco, M and L\'opez, J and Paduro, E.},
     journal = {2024},
     volume = {},

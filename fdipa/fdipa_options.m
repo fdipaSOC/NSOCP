@@ -3,7 +3,7 @@
 % This example is included in the as an application of the algorithm described 
 % in [1]. See README.md for details.
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function optobj = fdipa_options(varargin)
 % construct an object containing all the argument to call fdipa(..) 
@@ -36,10 +36,6 @@ function optobj = fdipa_options(varargin)
             switch varargin{2*(k-1)+1}
                 case 'Display'
                     msj=optobj.edit('Display',varargin{2*k});
-%                case 'SpecifyConstraintGradient'   %ignored, gradient of constraint is required
-%                    msj=optobj.edit('SpecifyConstraintGradient',varargin{2*k});
-%                case 'SpecifyObjectiveGradient'   %ignored, gradient of constraint is required   
-%                    msj=optobj.edit('SpecifyObjectiveGradient',varargin{2*k}) ;
                 case 'MaxIterations'      
                     msj=optobj.edit('MaxIterations',varargin{2*k}) ;
 % This parameter only make sense for equality contraints
@@ -53,8 +49,8 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('HessianFcn',varargin{2*k}) ;
                 case 'HessianApproximation'      
                     msj=optobj.edit('HessianApproximation',varargin{2*k}) ;
-                case 'HessianResetIterations'      
-                    msj=optobj.edit('HessianResetIterations',varargin{2*k}) ;                    
+                %case 'HessianResetIterations'      
+                %    msj=optobj.edit('HessianResetIterations',varargin{2*k}) ;                    
                 case 'ParXi'        
                     msj=optobj.edit('ParXi',varargin{2*k}) ;
                 case 'ParEta' %Armijo parameter for the line search 
@@ -81,12 +77,18 @@ function optobj = fdipa_options(varargin)
                     warning('The indicated variable does not belong to the set of options');
                     return      
             end
+            if msj ~= 1
+                break
+            end
         end
-        if msj==2 
-            disp('fdipa_options:Wrong datatype');
+        if msj==0
+            warning('fdipa_options:Chosen variable do not belong to the set of admisible options');
+            return
+        elseif msj==2 
+            warning('fdipa_options:Wrong datatype');
             return
         elseif msj==3
-            disp('fdipa_options:Parameter value out of Range');
+            warning('fdipa_options:Parameter value out of Range');
             return
         end 
     end

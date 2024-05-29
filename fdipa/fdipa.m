@@ -9,7 +9,7 @@
 % See README.md for details.
 % 
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 % [2] Alfredo Canelas, Miguel Carrasco, Julio Lopez (2019) A feasible 
 %     direction algorithm for nonlinear second-order cone programs, 
 %     Optimization Methods and Software, 34:6, 1322-1341, 
@@ -226,9 +226,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             b_update = @(x_new,x_old,y_new,y_old,fun,gj,hess_old) eye(dimx);
         case 'bfgs'
             b_update = @bfgs_update;
-            if isnan(options.HessianResetIterations)
-                options.HessianResetIterations = dimx;
-            end
         case 'user-supplied'
             if ~isa(options.HessianFcn,'function_handle')
                 error(append('fdipa: options.Hessian = supplied, you ', ...
@@ -241,10 +238,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             error('fdipa:Choosen option for the Hessian is not valid.');
     end
 
-    if isnan(options.HessianResetIterations)
-        options.HessianResetIterations = options.MaxIterations+1 ;
-    end
-
     % Start of the algorithm    
     % Step 0
     xk = x0; 
@@ -252,14 +245,13 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     matB=eye(dimx); 
     lamb_min =spectral_decomposition(gx0,mj);
     % Check feasible point, min(lamb_min) < 0 means that the point is unfeasible
-    %if min(lamb_min)<-options.ConstraintTolerance(1)
     if min(lamb_min)<0
         x = x0;
         [fval,grad] = fun(x); 
         exitflag = -1;
         % output
         output.iterations = 0;
-        output.cputime = toc;
+        output.walltime = toc;
         output.constrviolation = max(abs(min(lamb_min, 0)));
         output.stepsize = [];
         output.firstorderopt = [];
@@ -345,8 +337,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
             is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
                 && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
-            %norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
-            %norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
         else
             is_linear_system_solved = true;
         end        
@@ -366,8 +356,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
                 is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
                     && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
-                %norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
-                %norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
             else
                 is_linear_system_solved = true;
             end 
@@ -509,6 +497,14 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         % and options.ParSigma2. This is a measure of the conditioning 
         % of the matrix. If it fails the test the matrix B to the identity. 
 
+        %check if the matrix is positive definite
+        try chol(matB);
+        catch 
+            %if cholesky factorization fails indicates that matB is not positive definite.
+            %fprintf("Iter. %-4d Hessian approximation is not positive definite\n", k)
+            matB = eye(dimx);
+        end
+
         % Condition on smallest eigenvalue not being too small
         if norm(matB,2)/cond(matB) < options.ParSigma1 
             matB = eye(dimx);
@@ -541,7 +537,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     x= xk;
     [fval,grad] = fun(x); 
     output.iterations = k;
-    output.cputime = toc;
+    output.walltime = toc;
     output.constrviolation = feasibility;
     output.firstorderopt = norm_lag;
     output.compslack = comp_slack;

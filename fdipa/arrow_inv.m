@@ -3,10 +3,10 @@
 % This example is included in the as an application of the algorithm described 
 % in [1]. See README.md for details.
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function arrz=arrow_inv(z,mj)
-% Computes the inverse of the arrow matrix of the vector. See [1] page 1324 for definition.
+% Computes the inverse of the arrow matrix of the vector. See [2] page 1324 for definition.
 % When mj is given, returns a block diagonal matrix containing 
 % inverse arrow matrix of (z(1), ...,z(mj(1)) ) in the first block and 
 % inverse arrow matrix of (z(mj(1)+ ... + mj(k-1)+1), ..., z(mj(1)+ ... + mj(k))) 
@@ -23,7 +23,7 @@ function arrz=arrow_inv(z,mj)
 % OUTPUTS:
 %  - arrz: arrow matrix of the vector z, or block arrow matrix of z in the dimension mj.
 %
-% [1] Alfredo Canelas, Miguel Carrasco & Julio Lopez (2019) 
+% [2] Alfredo Canelas, Miguel Carrasco & Julio Lopez (2019) 
 % A feasible direction algorithm for nonlinear second-order cone programs, 
 % Optimization Methods and Software, 34:6,1322-1341, DOI: 10.1080/10556788.2018.1506452
     z=z(:);

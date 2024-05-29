@@ -3,11 +3,11 @@
 % This example is included in the as an application of the algorithm described 
 % in [1]. See README.md for details.
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function hess = bfgs_update(x_new, x_old, y_new, y_old, fun, gj,hess_old)
 %	grad_x_new, grad_x_old
-% BFGS formula with the Han-Powell modification [1] Section 14.7
+% BFGS formula with the Han-Powell modification [2] Section 14.7
 % INPUTS:
 %   - x_new: point at which the updated hessian is needed.
 %   - x_old: initial point at which the hessian is given.
@@ -18,7 +18,7 @@ function hess = bfgs_update(x_new, x_old, y_new, y_old, fun, gj,hess_old)
 %   - hess_old: hessian matrix at the point x.
 % OUTPUTS:
 %   - hess: approximate hessian matrix given by the BFGS method
-% [1] D.G. Luenberger.Linear  and  Nonlinear  Programming:  Second  Edition.  Springer,2003.
+% [2] D.G. Luenberger.Linear  and  Nonlinear  Programming:  Second  Edition.  Springer,2003.
 
     [~,grad_f_old] = fun(x_old); 
     grad_f_old = grad_f_old(:);

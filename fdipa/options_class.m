@@ -3,22 +3,18 @@
 % This example is included in the as an application of the algorithm described 
 % in [1]. See README.md for details.
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
-%     FDIPA-SOC: A MATLAB package for nonlinear Second-Order Cone programs
+%     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef options_class < handle
 %CLASS OPTIONS
     properties 
         Display; %indicates how much information will be shown
-        %SpecifyConstraintGradient; % UNUSED
-        %SpecifyObjectiveGradient; % UNUSED
         MaxIterations; %maximum number of iteration for the algorithm
         %ConstraintTolerance; %tolerance in the values of the constrain function
         OptimalityTolerance; % stopping test: Lagragian
         StepTolerance; % stopping test: da - direction 
         HessianFcn; % a function handle to custom Hessian function
         HessianApproximation; % indicates what hessian approximation will be used
-        HessianResetIterations; %integer that indicates the numbers 
-        % of iteration before reseting the Hessian to the identity matrix
         ParXi;
         ParEta;
         ParNu;
@@ -36,15 +32,12 @@ classdef options_class < handle
         function opt = options_class() 
         %Constructor of the class, set the default values of the parameters
             opt.Display = 'final';
-%            opt.SpecifyConstraintGradient= 'on';
-%            opt.SpecifyObjectiveGradient = 'on';
             opt.MaxIterations = 1000;
             %opt.ConstraintTolerance = 1e-6;
             opt.OptimalityTolerance = 1e-6;
             opt.StepTolerance = 1e-10;
             opt.HessianFcn  = NaN;
             opt.HessianApproximation= 'default';
-            opt.HessianResetIterations = NaN;
             opt.ParXi= 0.7;
             opt.ParEta= 0.5;
             opt.ParNu= 0.7;
@@ -67,7 +60,7 @@ classdef options_class < handle
         %    value: value of the parameter we want to modify.
         %
         % OUTPUTS:
-        %    status: Returns 0 if the chosen vairable do not belong to the set of admisible options
+        %    status: Returns 0 if the chosen variable do not belong to the set of admisible options
         %            Returns 1 if the variable belongs to the set of admisible options and if 
         %            chosen value is acceptable it changes the value of such parameter.
         %            Returns 2 if the datatype of 'value' is incorrect. 
@@ -93,32 +86,6 @@ classdef options_class < handle
                     else
                         status=2;
                     end
-                % case 'SpecifyConstraintGradient'
-                %     if ischar(value)==1
-                %         switch value
-                %             case 'on' 
-                %                 opt.SpecifyConstraintGradient = value;
-                %             case 'user-defined' 
-                %                 opt.SpecifyConstraintGradient = value;
-                %             otherwise
-                %                 status=3;
-                %         end
-                %     else
-                %         status=2;
-                %     end
-                % case 'SpecifyObjectiveGradient'
-                %     if ischar(value)==1
-                %         switch value
-                %             case 'on' 
-                %                 opt.SpecifyObjectiveGradient = value;
-                %             case 'user-defined' 
-                %                 opt.SpecifyObjectiveGradient = value;
-                %             otherwise
-                %                 status=3;
-                %         end
-                %     else
-                %         status=2;
-                %     end
                 case 'MaxIterations'
                     if isnumeric(value)==1
                         if value>0
@@ -181,17 +148,7 @@ classdef options_class < handle
                         end
                     else
                         status=2;
-                    end
-                    case 'HessianResetIterations'
-                        if isnumeric(value)==1
-                            if value>0
-                                opt.HessianResetIterations = value;
-                            else
-                                status=3;
-                            end
-                        else
-                            status=2;
-                        end                    
+                    end                    
                 case 'ParXi'
                     if isnumeric(value)==1
                         if (value>0)&&(value<1)
