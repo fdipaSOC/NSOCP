@@ -1,3 +1,4 @@
+function arrz=arrow_inv(z,mj)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This package has been downloaded from https://github.com/fdipaSOC/NSOCP
 % This example is included in the as an application of the algorithm described 
@@ -5,7 +6,6 @@
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
 %     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function arrz=arrow_inv(z,mj)
 % Computes the inverse of the arrow matrix of the vector. See [2] page 1324 for definition.
 % When mj is given, returns a block diagonal matrix containing 
 % inverse arrow matrix of (z(1), ...,z(mj(1)) ) in the first block and 

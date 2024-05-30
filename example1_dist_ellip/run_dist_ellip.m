@@ -24,13 +24,28 @@ mj = [3;3];
 
 disp('Experiment 1: default options');
 [~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0);
-
 fprintf(' BFGS & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
 
 disp('Experiment 2:  Hessian update off');
 my_options = fdipa_options('Display','final','HessianApproximation','off');
 [~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
 fprintf(' off & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
+
+disp('Experiment 3:  Hessian update Modified Newton');
+%for the modified newton approximation, because for this example the
+%Hessian of the Lagrangian is constant, the Hessian approximation is also
+%constant
+mod_newton = [1 0 -1 0;0 1 0 -1;-1 0 1 0;0 -1 0 1];
+epsilon = min(eig(mod_newton));
+if epsilon <= 0.0
+  	mod_newton = mod_newton+(abs(epsilon)+0.1)*eye(4);
+end
+
+my_options = fdipa_options('Display','final', ...
+    'HessianApproximation','user-supplied','HessianFcn',@(x_new,x_old,y_new, y_old, fun,gj,hess_old) mod_newton);
+[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+fprintf(' Modified Newton & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
+
 
 clear 'x0' 'y0' 'mj' 'my_options' 'x' 'fval' 'exitflag' 'output'
 
@@ -54,5 +69,4 @@ function [g_fun,grad_g]=g_dist_ellip(x)
     grad_g1=[0 0 0 0 ; 0.5 0 0 0; 0 1 0 0];
     grad_g2=[0 0 0 0; 0 0 -0.7071 -0.7071;  0 0 -0.3536 0.3536];
     grad_g=[grad_g1;grad_g2];
-end            
-                 
+end                             

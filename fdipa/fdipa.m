@@ -1,3 +1,4 @@
+function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FDIPA : feasible direction interior-point algorithm. 
 % The details of this particular implementation are contained in [1]. 
@@ -17,7 +18,6 @@
 % [3] J. Herskovits, Feasible direction interior-point technique for 
 %     nonlinear optimization, J. Optim. TheoryAppl. 99 (1998), pp. 121–146.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 % FDIPA : feasible direction interior-point algorithm
 % fdipa attempts to find a minimum of a scalar function with 
 % second order cone constraints, starting at an initial estimate.
@@ -378,8 +378,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             if rcond1 < 1/options.NumericalConditioning || rcond2 < 1/options.NumericalConditioning
                 is_linear_system_solved =  norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)]) < options.LinearSystemTolerance ...
                     && norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk]) < options.LinearSystemTolerance;
-                norm([matB, -grad_gxk'; arrw_y*grad_gxk, arrw_g]*[da;ya] - [-grad_fxk; zeros(sum(mj),1)])
-                norm([matB,-grad_gxk';arrw_y*grad_gxk, arrw_g]*[db;yb] - [zeros(dimx,1);yk])
             else
                 is_linear_system_solved = true;
             end            
@@ -561,7 +559,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     elseif ~is_linear_system_solved
         % stop if maximum iterations is reached
         exitflag = 0; 
-        output.message = 'Linear System too stiff, algorithm cannot continue';
+        output.message = 'Linear System is badly conditioned, algorithm cannot continue';
         disp(output.message);    
     elseif norm_da < options.StepTolerance
         % stop if norm of the direction vector is too small

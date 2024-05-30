@@ -1,3 +1,4 @@
+function optobj = fdipa_options(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This package has been downloaded from https://github.com/fdipaSOC/NSOCP
 % This example is included in the as an application of the algorithm described 
@@ -5,7 +6,6 @@
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
 %     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function optobj = fdipa_options(varargin)
 % construct an object containing all the argument to call fdipa(..) 
 % INPUT:
 %   - varargin: Any number of arguments, separated by comma, indicating the 

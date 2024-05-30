@@ -9,9 +9,9 @@
 % Example 3: Linear cone contraint Quadratic objective
 
 % Construction of the matrices for the problem
-%N=16;
+N=16;
 %N=20;
-N=35;
+%N=35;
 %N=50;
 vertices=[ones(1,N); zeros(N-1,N)];
 x0=10*eye(N);
@@ -30,16 +30,15 @@ for i=1:N
         matJ((i-1)*N+1:i*N,(j-1)*N+1:j*N)=speye(N);
     end
 end
-matQ=N*speye(N^2)-matJ;
+matQ=(N+1)*speye(N^2)-matJ;
 
 my_options = fdipa_options('Display','final','StepTolerance',1e-15);
-[x,fval,~,output,lambda] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
-
+[~,fval,~,output,lambda] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
 fprintf('%d & Exact & %d & %11f & %11.5e & %11f \\\\ %%exact \n',N^2,output.iterations,fval, output.firstorderopt, output.walltime)
 
 % In order to use a different Hessian update we choose the appropriate option
 my_options = fdipa_options('Display','final','HessianApproximation','bfgs','StepTolerance',1e-15);
-[x,fval,~,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
+[~,fval,~,output] = fdipaQuad(matQ,cvec,matA,b,x0,mj,[],my_options);
 fprintf('%d & BFGS & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',N^2,output.iterations,fval, output.firstorderopt, output.walltime)
 
 

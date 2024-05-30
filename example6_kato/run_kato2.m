@@ -17,12 +17,12 @@
 seed = RandStream('mt19937ar','Seed',1);
 
 % choice of cones for the example
-mj= [5;5];
-mj= [5;5;20];
-mj=[5;5;20;20];
-mj=[10;10;20;20;10];
-mj=[10;10;20;20;20;20];
-%mj=[20;20;30;30;20;30;10];
+%mj= [5;5];
+%mj= [5;5;20];
+%mj=[5;5;20;20];
+%mj=[10;10;20;20;10];
+%mj=[10;10;20;20;20;20];
+mj=[20;20;30;30;20;30;10];
 %mj=[30;30;40;40;30;30;40];
 %mj=[40;40;50;50;50;40;30;40];
 %mj=[50;60;70;70;50;60;60;60];
@@ -53,7 +53,7 @@ y0 = b;
 x0 = zeros(n,1);
 
 disp('experiment 2a: Hessian update bfgs');
-my_options = fdipa_options('Display', 'final','MaxIterations',10000,'StepTolerance',1e-15);%, ...
+my_options = fdipa_options('Display', 'final','MaxIterations',30000,'StepTolerance',1e-15);%, ...
     %'StepTolerance',1e-10,'LinearSystemTolerance',1e-4);
 [~,fval,~,output]=fdipa(@(x)fun_kato2(x,C,d,e,f),x0,@(x)g_kato2_nlin(x,a1,a2,b), ...
     mj,y0,my_options);
@@ -69,7 +69,7 @@ hess_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) hess_update_kato2
 
 my_options = fdipa_options('Display', 'final',...
     'HessianApproximation','user-supplied','HessianFcn', hess_update,...
-    'MaxIterations',50000,'StepTolerance',1e-15);%, 'StepTolerance',1e-10,'LinearSystemTolerance',1e-4);   
+    'MaxIterations',30000,'StepTolerance',1e-15);%, 'StepTolerance',1e-10,'LinearSystemTolerance',1e-4);   
 [~,fval,~,output]=fdipa(@(x)fun_kato2(x,C,d,e,f),x0,@(x)g_kato2_nlin(x,a1,a2,b), ...
     mj,y0,my_options);
 fprintf('~[');
