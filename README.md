@@ -38,7 +38,7 @@ The scripts are organized in the following folders:
 * `example6_kato`: Kato-Fukushima example of for nonlinear second-order cone programs as presented in [2].
 * `example7_svm`: Application to support vector machines (Requires CVX).
 # Additional examples
-* `example6_cubic`: example of cubic objective function with linear constraints.
+* `example8_cubic`: example of cubic objective function with linear constraints.
 
 
 
