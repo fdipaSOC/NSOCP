@@ -19,10 +19,6 @@ where `AbsolutePathToToolbox` is the name of the absolute path where you cloned 
 Adding this command to your MATLAB `startup.m` file will make sure these tools are avalible every time you
 use MATLAB.
 
-## Documentation
-
-[Documentation PDF](documentation/doc_fdipa.pdf)
-
 ## Contents
 The scripts are organized in the following folders:
 
