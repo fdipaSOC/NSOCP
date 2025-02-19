@@ -30,6 +30,8 @@ mj = [2;3];
 
 x0 = x0{2};
 
+
+
 disp('Experiment 1: default options')
 [~,fval,~,output] = fdipa(@fun_hyf,x0,@g_hyf,mj);
 fprintf('BFGS & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)

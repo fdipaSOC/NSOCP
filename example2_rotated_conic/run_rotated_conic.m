@@ -73,9 +73,9 @@
 seed = RandStream('mt19937ar','Seed',1);
 %m=10;
 %m=30;
-m=100;
+%m=100;
 %m=1000;
-%m=10000;
+m=10000;
 a = 10*rand(seed);
 b = 10*rand(seed);
 c = -1+ 2*rand(seed,m,1);
@@ -105,7 +105,7 @@ function [g_fun,grad_g]=g_rotated_conic(x,m)
     matA(1,2) = 1;
     matA(m+2,1) = 1;
     matA(m+2,2) = -1;
-    matA(2:(m+1),3:m+2) = eye(m);
+    matA(2:(m+1),3:m+2) = sqrt(2)* eye(m);
     g_fun = matA * x;
     grad_g = matA;
 end

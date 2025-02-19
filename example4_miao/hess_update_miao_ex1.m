@@ -31,7 +31,9 @@ function B = hess_update_miao_ex1(x)
     		B(j,i) = 4*f*x_aux(i)*x_aux(j);
     	end
     end
-    epsilon = min(eig(B));
-    if epsilon <= 0.0
-    	B = B+(abs(epsilon)+0.1)*eye(n);
+    
+    try chol(B);
+    catch 
+        %if cholesky factorization fails indicates that matB is not positive definite.
+        B = B+(abs(min(eig(B)))+0.1)*eye(n);
     end

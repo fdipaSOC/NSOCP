@@ -7,10 +7,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [g,Gradg]=g_svm_ccl1(x,mu,Mchol_1,Mchol_2)
 % Constraints for the SVM example written as connical restrictions
+%
+%
 %  mu_1^t*w+b >= 1+ kappa_1* norm{S_1^t w}
 %  -mu_2^t*w-b >= 1+  kappa_2* norm{S_2^t w}
-%   kappa_1 >=0
-%   kappa_2 >=0
+%   kappa >=0
+%  mu_1^t*w+b >= 0
+%  -mu_2^t*w-b >= 0
+
 
 x=x(:);
 n=size(mu,2);

@@ -17,9 +17,10 @@ function B = hess_update_kato1(x_new,C,d)
 
     x =  x_new(:);
     B = C+ 12*diag((d.*(x.^2)));
-    epsilon = min(eig(B));
-    if epsilon <= 0.0
-    	B = B+(abs(epsilon)+0.1)*eye(n);
-    end
 
+    try chol(B);
+    catch 
+        %if cholesky factorization fails indicates that matB is not positive definite.
+        B = B+(abs(min(eig(B)))+0.1)*eye(n);
+    end
  

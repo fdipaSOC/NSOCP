@@ -30,7 +30,8 @@ function B = hess_update_hyf(x)
     B(3,3) = exp(x(1)-x(3))+25*((1+(3*x(2)+5*x(3))^2)^(-1/2) ...
         -(3*x(2)+5*x(3))^2/(1+(3*x(2)+5*x(3))^2)^(3/2));
     
-    epsilon = min(eig(B));
-    if epsilon <= 0.0
-    	B = B+(abs(epsilon)+0.1)*eye(n);
+    try chol(B);
+    catch 
+        %if cholesky factorization fails indicates that matB is not positive definite.
+        B = B+(abs(min(eig(B)))+0.1)*eye(n);
     end

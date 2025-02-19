@@ -242,8 +242,14 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     % Step 0
     xk = x0; 
     yk = y0;
+    % %this allows the use of a custom Hessian in the first iteration
+    % try matB = b_update(xk,[],yk,[],fun,gj, eye(dimx));
+    % catch
+    %     matB=eye(dimx); 
+    % end
     matB=eye(dimx); 
     lamb_min =spectral_decomposition(gx0,mj);
+    hessian_reset_count=0;
     % Check feasible point, min(lamb_min) < 0 means that the point is unfeasible
     if min(lamb_min)<0
         x = x0;
@@ -257,6 +263,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         output.firstorderopt = [];
         output.message = 'fdipa:starting point is unfeasible';
         output.bestfeasible=[];
+        output.hessianresetcount=hessian_reset_count;
         % lambda
         lambda.gj = y0;
         % Hessian
@@ -310,9 +317,16 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         if norm_lag <options.OptimalityTolerance
             break 
         end
+        
         if k>0 && stepsize < options.StepTolerance
             break
         end
+
+        % stop if objetive function value is less than a given target value
+        if fxk < options.LowerOptimalityBound
+            break
+        end
+
 
         % Step 1: looking for a feasible descend direction. 
         % Solving systems (i) and (ii)
@@ -365,6 +379,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         % approximation matB, so we reset it to matB = Id and try again.
         if ~is_linear_system_solved
             matB = eye(dimx);
+            hessian_reset_count = hessian_reset_count+1;
             % Solving system for (da, ya)
             arrw_inv_g = arrow_inv(gxk,mj);
             matM1=arrw_inv_g*arrw_y*grad_gxk;
@@ -406,7 +421,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         yk_hat = ya + rho*yb;
         
         
-        % Step 2: Armijo linear search
+        % Step 2: Armijo line search
         % to accept a step size we check if the new point has enough descend, 
         % the point we reach is feasible, and an additional 
         % technical spectral condition specified in the algorithm 
@@ -417,10 +432,8 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             = spectral_decomposition(gxk,mj);
 
         first_armijo_iteration = true;
-        % armijo_iter = 1;
         while first_armijo_iteration || (~has_enough_descend)||(~is_feasible) ...
                 ||(~satisfy_spectral_condition)
-            % armijo_iter = armijo_iter + 1;
             if first_armijo_iteration
                 first_armijo_iteration = false;
             else
@@ -430,7 +443,6 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             gxt=gj(xk + t*desc_dir); 
             lamb_min_t=spectral_decomposition(gxt,mj);
             has_enough_descend = fxt<=fxk+t*options.ParEta*desc_dir'*grad_fxk;
-            %is_feasible = min(lamb_min_t)>-options.ConstraintTolerance(1);
             is_feasible = min(lamb_min_t)>0;
             % verify spectral conditions
             satisfy_spectral_condition = true;
@@ -489,7 +501,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         % Update Bk
         matB = b_update(xnew,xk,ynew,yk,fun,gj, matB);
 
-        % To verify Assumtion 3.5 in [1] we compute the largest singular 
+        % To verify Assumption 3.5 in [1] we compute the largest singular 
         % value norm(matB,2) and the condition number cond(matB) of the 
         % matrix matB, compare them with the parameters options.ParSigma1 
         % and options.ParSigma2. This is a measure of the conditioning 
@@ -499,21 +511,23 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         try chol(matB);
         catch 
             %if cholesky factorization fails indicates that matB is not positive definite.
-            %fprintf("Iter. %-4d Hessian approximation is not positive definite\n", k)
             matB = eye(dimx);
+            hessian_reset_count = hessian_reset_count+1;
         end
 
         % Condition on smallest eigenvalue not being too small
         if norm(matB,2)/cond(matB) < options.ParSigma1 
             matB = eye(dimx);
+            hessian_reset_count = hessian_reset_count+1;
         end
         % Condition on largest singular value not being too large
         if norm(matB,2) > options.ParSigma2 
             matB = eye(dimx);
+            hessian_reset_count = hessian_reset_count+1;
         end
        
         stepsize = norm(t*desc_dir);
-        dual_stepsize= norm(ynew-yk);
+        dual_stepsize = norm(ynew-yk);
         xk = xnew;
         yk = ynew;
     end
@@ -543,6 +557,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     output.bestfeasible.fval = fval;
     output.bestfeasible.constrviolation = output.constrviolation;
     output.bestfeasible.firstorderopt = output.firstorderopt;
+    output.hessianresetcount=hessian_reset_count;
     lambda.gj = yk;
     hessian = matB;
     if k==0
@@ -555,30 +570,34 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
         exitflag = 1;
         output.message = append('Convergence by norm(Grad_Lag)<', ...
             num2str(options.OptimalityTolerance));
-        disp(output.message);
     elseif ~is_linear_system_solved
         % stop if maximum iterations is reached
         exitflag = 0; 
         output.message = 'Linear System is badly conditioned, algorithm cannot continue';
-        disp(output.message);    
     elseif norm_da < options.StepTolerance
         % stop if norm of the direction vector is too small
         exitflag = 2;
         output.message = append('Convergence by norm of direction vector da <',...
             num2str(options.StepTolerance));
-        disp(output.message);
     elseif stepsize < options.StepTolerance
         % stop if stepsize is too small
         exitflag = 2;
         output.message = append('Convergence by step size: stepsize <',...
             num2str(options.StepTolerance));
-        disp(output.message);
+    elseif fval < options.LowerOptimalityBound
+        % stop if objective function value is too small
+        exitflag = 2;
+        output.message = append('Objetive function value is less than: f(x) <',...
+            num2str(options.LowerOptimalityBound));
     elseif k==options.MaxIterations 
         % stop if maximum iterations is reached
         exitflag = 0; 
         output.message = 'Number of iterations exceeded options.MaxIterations';
-        disp(output.message);
     else
         warning('fdipa: unexpected algorithm exit.')
+        output.message = 'fdipa: unexpected algorithm exit.';
+    end
+    if ~strcmp(options.Display,'off') && ~strcmp(options.Display,'none') 
+        disp(output.message);
     end
 end

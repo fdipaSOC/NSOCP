@@ -13,6 +13,7 @@ classdef options_class < handle
         %ConstraintTolerance; %tolerance in the values of the constrain function
         OptimalityTolerance; % stopping test: Lagragian
         StepTolerance; % stopping test: da - direction 
+        LowerOptimalityBound; % stopping test, value of objective function
         HessianFcn; % a function handle to custom Hessian function
         HessianApproximation; % indicates what hessian approximation will be used
         ParXi;
@@ -36,10 +37,11 @@ classdef options_class < handle
             %opt.ConstraintTolerance = 1e-6;
             opt.OptimalityTolerance = 1e-6;
             opt.StepTolerance = 1e-10;
+            opt.LowerOptimalityBound = -realmax; % stopping test, value of objective function
             opt.HessianFcn  = NaN;
             opt.HessianApproximation= 'default';
             opt.ParXi= 0.7;
-            opt.ParEta= 0.5;
+            opt.ParEta= 1e-4;
             opt.ParNu= 0.7;
             opt.ParPhi= 1;
             opt.ParCI= 1e-9;
@@ -70,7 +72,7 @@ classdef options_class < handle
             status=1;
             switch varName
                 case 'Display'
-                    if ischar(value)==1
+                    if ischar(value)
                         switch value
                             case 'off' 
                                 opt.Display = value;
@@ -87,7 +89,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'MaxIterations'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.MaxIterations = value;
                         else
@@ -107,7 +109,7 @@ classdef options_class < handle
                 %         status=2;
                 %     end
                 case 'OptimalityTolerance'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.OptimalityTolerance = value;
                         else
@@ -117,7 +119,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'StepTolerance'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.StepTolerance = value;
                         else
@@ -126,14 +128,20 @@ classdef options_class < handle
                     else
                         status=2;
                     end 
+                case 'LowerOptimalityBound'
+                        if isnumeric(value)
+                            opt.LowerOptimalityBound = value;
+                        else
+                            status=2;
+                        end 
                 case 'HessianFcn'
-                    if isa(value,'function_handle')==1
+                    if isa(value,'function_handle')
                         opt.HessianFcn = value;
                     else
                         status=2;
                     end
                 case 'HessianApproximation'
-                    if ischar(value)==1
+                    if ischar(value)
                         switch value
                             case 'off' 
                                 opt.HessianApproximation = value;
@@ -150,7 +158,7 @@ classdef options_class < handle
                         status=2;
                     end                    
                 case 'ParXi'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if (value>0)&&(value<1)
                             opt.ParXi = value;
                         else
@@ -160,7 +168,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParEta'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if (value>0)&&(value<1)
                             opt.ParEta = value;
                         else
@@ -170,7 +178,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParNu'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if (value>0)&&(value<1)
                             opt.ParNu = value;
                         else
@@ -180,7 +188,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParPhi'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.ParPhi = value;
                         else
@@ -190,7 +198,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParCI'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.ParCI = value;
                         else
@@ -200,7 +208,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParCS'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if value>0
                             opt.ParCS = value;
                         else
@@ -210,7 +218,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParLambdam'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if min(value)>0
                             opt.ParLambdam = value;
                         else
@@ -220,7 +228,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'ParSigma1'
-                        if isnumeric(value)==1
+                        if isnumeric(value)
                             if min(value)>0
                                 opt.ParSigma1 = value;
                             else
@@ -230,7 +238,7 @@ classdef options_class < handle
                             status=2;
                         end 
                 case 'ParSigma2'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if min(value)>0
                             opt.ParSigma2 = value;
                         else
@@ -240,7 +248,7 @@ classdef options_class < handle
                         status=2;
                     end 
                 case 'NumericalConditioning'
-                    if isnumeric(value)==1
+                    if isnumeric(value)
                         if min(value)>0
                             opt.NumericalConditioning = value;
                         else
@@ -250,7 +258,7 @@ classdef options_class < handle
                         status=2;
                     end
                 case 'LinearSystemTolerance'
-                        if isnumeric(value)==1
+                        if isnumeric(value)
                             if min(value)>0
                                 opt.LinearSystemTolerance = value;
                             else

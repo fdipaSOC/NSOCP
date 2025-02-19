@@ -20,7 +20,9 @@ function B = hess_update_miao_ex2(xk,yk)
     n = 2;
     %yk = xkyk((n+1):length(xkyk));
     B = [2 2;2 4] - [2 0;0 2] *yk(2);
-    epsilon = min(eig(B));
-    if epsilon <= 0.0
-    	B = B+(abs(epsilon)+0.1)*eye(n);
+    
+    try chol(B);
+    catch 
+        %if cholesky factorization fails indicates that matB is not positive definite.
+        B = B+(abs(min(eig(B)))+0.1)*eye(n);
     end

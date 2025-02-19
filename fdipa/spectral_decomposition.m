@@ -30,7 +30,7 @@ function [lambda1,lambda2,u1,u2]=spectral_decomposition(w_vec,mj)
 %  - u2: second vector of the spectral decomposition
 %
 % USAGE:
-    if length(w_vec) == 1
+    if isscalar(w_vec)
         u1 = 1;
         u2 = 0;
         lambda1 = w_vec(1);
@@ -39,8 +39,6 @@ function [lambda1,lambda2,u1,u2]=spectral_decomposition(w_vec,mj)
     end
     switch nargin
         case 1
-            dim_m = length(w_vec);
-            
             w1 = w_vec(1);
             w_bar = w_vec(2:end);
             if norm(w_bar)~=0
@@ -54,7 +52,7 @@ function [lambda1,lambda2,u1,u2]=spectral_decomposition(w_vec,mj)
             else
                 % if norm(w_bar) = 0 we can take any unitary v, so 
                 % we choose v to be the first cannonical vector
-                v = [1;zeros(dim_m-2,1)];
+                v = [1;zeros(length(w_vec)-2,1)];
                 u1 = 0.5*[1;-v];
                 u2 = 0.5*[1; v];
                 lambda1 = w1;

@@ -45,7 +45,9 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('OptimalityTolerance',varargin{2*k}) ;
                 case 'StepTolerance'         
                     msj=optobj.edit('StepTolerance',varargin{2*k}) ;
-                case 'HessianFcn'      
+                case 'LowerOptimalityBound'         
+                    msj=optobj.edit('LowerOptimalityBound',varargin{2*k}) ;                    
+                case 'HessianFcn'    
                     msj=optobj.edit('HessianFcn',varargin{2*k}) ;
                 case 'HessianApproximation'      
                     msj=optobj.edit('HessianApproximation',varargin{2*k}) ;
