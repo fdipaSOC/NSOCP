@@ -87,10 +87,10 @@ min_report = min(report);
 mean_report = mean(report);
 array2table([max_report; min_report;mean_report] ,...
     'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1'},...
-    'RowNames',{'max','min','mean'})
+    'RowNames',{'max','min','mean'});
 
 fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f  & %11.5e & %11.5e \\\\\n", ...
-mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,4),max_report(1,5))
+mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,4),max_report(1,5));
 
 
 
@@ -105,12 +105,12 @@ function [f,Gf]=f_svm_ccl1(x,C)
 % Output:  f:= function 
 %          Gf:= Gradient
 %          HF:= Hessian
-x=x(:);
-n=length(x);
-% Objective function
-f=  0.5 * norm(x(1:(n-2)))^2 + C/(1 + x(n)^2);
-% Compute the gradient
-Gf=[x(1:(n-2));0;-2* C *x(n)/(1 + x(n)^2)^2];
+    x=x(:);
+    n=length(x);
+    % Objective function
+    f=  0.5 * norm(x(1:(n-2)))^2 + C/(1 + x(n)^2);
+    % Compute the gradient
+    Gf=[x(1:(n-2));0;-2* C *x(n)/(1 + x(n)^2)^2];
 end
 
 

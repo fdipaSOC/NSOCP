@@ -5,7 +5,7 @@
 % [1] Alfredo Canelas, Miguel Carrasco, Julio Lopez, Esteban Paduro (2024)
 %     FDIPA-SOC: A MATLAB Package for Nonlinear Second-Order Cone Programs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function B = hess_update_kato1(x_new,C,d) 
+function B = hess_update_kato1_BB(x_new,x_old,y_new,y_old,fun,gj,hess_old)  
 % Hessian update for the Kato-Fukushima example of 
 % for nonlinear second-order cone programs as presented in [2] 
 % Experiment 1
@@ -14,14 +14,21 @@ function B = hess_update_kato1(x_new,C,d)
 % https://doi.org/10.1007/s11590-006-0009-2
 %
 % Custom Hessian update for experiment 1
+% this is an implementarion of the Barzilai and Borwein Hessian update
+       
+    lambda_min=1e-6;
+    lambda_max=1e6;
+    [~, fgrad] = fun(x_new);
+    [~, fgrad_old] = fun(x_old);
+    [~, ggrad] = gj(x_new);
+    [~, ggrad_old] = gj(x_old);
+    n = length(fgrad);
+    
+    variation_lagrangian = fgrad - ggrad' * y_new  -fgrad_old + ggrad_old' * y_old;
+    dx = x_new-x_old;
+    sigma_long = dx'*variation_lagrangian/(dx'*dx);
+    %sigma_short = dx'*variation_lagrangian/(variation_lagrangian'*variation_lagrangian);
+    sigma=min(lambda_max,max(lambda_min,sigma_long));
+    B = sigma * eye(n);
 
-    x =  x_new(:);
-    n = length(C);
-    B = C+ 12*diag((d.*(x.^2)));
-
-    try chol(B);
-    catch 
-        %if cholesky factorization fails indicates that matB is not positive definite.
-        B = B+(abs(min(eig(B)))+0.1)*eye(n);
-    end
  

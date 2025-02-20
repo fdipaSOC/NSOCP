@@ -44,6 +44,9 @@ mj=[n+1;n+1;1;1];
 
 maxiter = 30;
 report = zeros(maxiter,8);
+Prediction_X = zeros(m,maxiter);
+AUC = zeros(maxiter,1);
+Accu = zeros(maxiter,1);
 
 %Experiment 2: Logarithmic objective with L2 regularization
 disp('Experiment 2: Logarithmic objective with L2 regularization and weights C1=C2=1, BFGS');
@@ -83,16 +86,30 @@ for iter=1:maxiter
     report(iter,:) = [output.iterations, output.walltime, fval,output.firstorderopt , output.compslack,output.constrviolation,eta_opt(1),eta_opt(2)];
     fprintf('%d & %d & %11f & %11.5e & %11f & %11.5f & %11.5f \\\\ \n',m, output.iterations,fval, output.firstorderopt, output.walltime,eta_opt(1),eta_opt(2))
 
+    Prediction_X(:,iter)=sign(X*x(1:n)+x(n+1));
+    [AUC(iter),Accu(iter)]=medi_auc_accu(Prediction_X(:,iter),Y);
 end
+
+mean_AUC=mean(AUC);
+max_Accu=max(Accu);
+min_Accu=min(Accu);
+mean_Accu=mean(Accu);
+
 max_report = max(report);
 min_report = min(report);
 mean_report = mean(report);
-array2table([max_report; min_report;mean_report] ,...
-    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2'},...
+array2table([max_report max_Accu ; min_report min_Accu;mean_report  mean_Accu] ,...
+    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2','Accu'},...
     'RowNames',{'max','min','mean'})
+%array2table([max_report; min_report;mean_report] ,...
+%    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2'},...
+%    'RowNames',{'max','min','mean'})
 
-fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e \\\\\n", ...
-mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,8),report(1,4),max_report(1,5))
+fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e & %4.4f\\\\\n", ...
+mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,8),report(1,4),max_report(1,5),mean_Accu);
+
+%fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e \\\\\n", ...
+%mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,8),report(1,4),max_report(1,5))
 
 
 function [f,Gf]=f_svm_aux(x)

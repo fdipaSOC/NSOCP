@@ -22,10 +22,10 @@
 %The following datasets are obtained from
 % Markelle Kelly, Rachel Longjohn, Kolby Nottingham,
 % The UCI Machine Learning Repository, https://archive.ics.uci.edu
-%load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat']); label = 'ds1';
+load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat']); label = 'ds1';
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat']); label = 'ds2';
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\german_credit.mat']); label = 'ds3';
-load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat']); label = 'ds4';
+%load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat']); label = 'ds4';
 
 %data files contains arrays X containing the information asociated with
 %each measurement, and an array Y indicating the 
@@ -39,7 +39,7 @@ seed = RandStream('mt19937ar','Seed',1);
 [mu,Mchol_1,Mchol_2]=split_chol(X,Y);
 mj=[n+1;n+1;1;1];
 theta=1/2;
-maxiter = 30;
+maxiter = 5;
 report = zeros(maxiter,8);
 
 

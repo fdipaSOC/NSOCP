@@ -22,10 +22,10 @@
 %The following datasets are obtained from
 % Markelle Kelly, Rachel Longjohn, Kolby Nottingham,
 % The UCI Machine Learning Repository, https://archive.ics.uci.edu
-%load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat']); label = 'ds1';
+load([fileparts(mfilename('fullpath')),'\dataset_Class\breastcancer.mat']); label = 'ds1';
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\diabetes.mat']); label = 'ds2';
 %load([fileparts(mfilename('fullpath')),'\dataset_Class\german_credit.mat']); label = 'ds3';
-load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat']); label = 'ds4';
+%load([fileparts(mfilename('fullpath')),'\dataset_Class\splice.mat']); label = 'ds4';
 
 %data files contains arrays X containing the information asociated with
 %each measurement, and an array Y indicating the 
@@ -42,7 +42,7 @@ mj=[n+1;n+1;1;1];
 %nu=[0.01;0.005];
 %nu=[0.005;0.01];
 
-maxiter = 30;
+maxiter = 5;
 report = zeros(maxiter,8);
 
 %Experiment 2: Logarithmic objective with L2 regularization
