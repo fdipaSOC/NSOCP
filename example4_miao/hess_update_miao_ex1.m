@@ -14,8 +14,6 @@ function B = hess_update_miao_ex1(x)
 % network for solving nonlinear convex programs with second-order cone 
 % constraints, Information Sciences, Volume 268, 2014, p 255-270, 
 % https://doi.org/10.1016/j.ins.2013.10.017
-    %xkyk = xkyk(:);
-    %x= xkyk(1:n);
     n = 5;
     x= x(:);
     B = zeros(n,n);

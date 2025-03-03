@@ -14,11 +14,8 @@ function B = hess_update_miao_ex2(xk,yk)
 % network for solving nonlinear convex programs with second-order cone 
 % constraints, Information Sciences, Volume 268, 2014, p 255-270, 
 % https://doi.org/10.1016/j.ins.2013.10.017
-    %xkyk = xkyk(:);
-    %xk=xk(:);
     yk=yk(:);
     n = 2;
-    %yk = xkyk((n+1):length(xkyk));
     B = [2 2;2 4] - [2 0;0 2] *yk(2);
     
     try chol(B);

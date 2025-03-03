@@ -27,22 +27,23 @@ x0 = {[1 ;0 ;0] ,  ...
       [3.2266;-0.7353;-1.5477] , ...
       [3.7282;0.2875;0.2737] };
 mj = [2;3]; 
-
+% we can use one of some pprecomputed feasible points
 x0 = x0{2};
-
+% or we can use the subroutine to look for a feasible point using fdipa
+%x0 = searchStartingPoint(3,@g_hyf,mj);
 
 
 disp('Experiment 1: default options')
 [~,fval,~,output] = fdipa(@fun_hyf,x0,@g_hyf,mj);
-fprintf('BFGS & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf('BFGS & %d & %5.3f & %11.5e & %5.3f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
 disp(strcat('Experiment 2: using modified Newton Hessian update'));
 hess_update= @(x_new,x_old,y_new,y_old,fun,gj,hess_old) hess_update_hyf(x_new);
 my_options = fdipa_options('MaxIterations',100, ...
     'HessianApproximation','user-supplied','HessianFcn',hess_update);
-[x,fval,exitflag,output] = fdipa(@fun_hyf,x0,@g_hyf,mj,[],my_options);
-fprintf('Modified Newton & %d & %11f & %11.5e & %11f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
+[~,fval,~,output] = fdipa(@fun_hyf,x0,@g_hyf,mj,[],my_options);
+fprintf('Modified Newton & %d & %5.3f & %11.5e & %5.3f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
-clear 'x0' 'mj' 'my_options' 'i';
+clear 'x0' 'mj' 'my_options' 'i' 'fval' 'hess_update' 'output'
 
       

@@ -25,14 +25,13 @@ The scripts are organized in the following folders:
 * `fdipa`: source files for fdipa algorithm. 
   * `fdipa/fdipa.m`: solves a random linear programming problem using either interface.
   * `fdipa/fdipaQuad.m`: solves a random linear programming problem using either interface.
-* `documentation`: source files for the documentation
 * `example1_dist_ellip`: application of fdipaQuad to the problem of distance between two ellipses.
 * `example2_rotated_conic`: example of a quadratic objective with rotated conic constraints.
 * `example3_quadratic`: example of application of fdipaQuad to a quadratic problem with linear cone constraints.
 * `example4_miao`: Miao-Chen-Ko example of nonlinear convex programs with second-order cone constraints as presented in [3].
 * `example5_hyf_nonlinear`: Example of nonlinear problem with linear constraints used in Example 4.2 of [4] (also  used in Ex. 5.3 of [3]).
 * `example6_kato`: Kato-Fukushima example of for nonlinear second-order cone programs as presented in [2].
-* `example7_svm`: Application to support vector machines (Requires CVX).
+* `example7_svm`: Application to robust support vector machines.
 # Additional examples
 * `example8_cubic`: example of cubic objective function with linear constraints.
 

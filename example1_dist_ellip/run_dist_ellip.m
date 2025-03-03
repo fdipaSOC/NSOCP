@@ -95,33 +95,41 @@
 x0 = [1;0;1;5];
 y0 = [];
 mj = [3;3];
+% if instead we want to use the subroutine searchStartingPoint to look for
+% a feasible starting point
+% x0=searchStartingPoint(4,@g_dist_ellip,mj);
 
 disp('Experiment 1: default options');
-[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0);
-fprintf(' BFGS & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
+[~,fval,~,output1] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0);
+fprintf('BFGS & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output1.iterations,fval, sqrt(fval), output1.firstorderopt, output1.walltime)
 
 disp('Experiment 2:  Hessian update off');
 my_options = fdipa_options('Display','final','HessianApproximation','off');
-[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
-fprintf(' off & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
+[~,fval,~,output2] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+fprintf('off & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output2.iterations,fval, sqrt(fval), output2.firstorderopt, output2.walltime)
 
 disp('Experiment 3:  Hessian update Modified Newton');
 %for the modified newton approximation, because for this example the
 %Hessian of the Lagrangian is constant, the Hessian approximation is also
 %constant
 mod_newton = [1 0 -1 0;0 1 0 -1;-1 0 1 0;0 -1 0 1];
-epsilon = min(eig(mod_newton));
-if epsilon <= 0.0
+
+try chol(mod_newton);
+catch 
+%if cholesky factorization fails indicates that matB is not positive definite.
+    epsilon = min(eig(mod_newton));
   	mod_newton = mod_newton+(abs(epsilon)+0.1)*eye(4);
 end
 
 my_options = fdipa_options('Display','final', ...
     'HessianApproximation','user-supplied','HessianFcn',@(x_new,x_old,y_new, y_old, fun,gj,hess_old) mod_newton);
-[~,fval,~,output] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
-fprintf(' Modified Newton & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, sqrt(fval), output.firstorderopt, output.walltime)
+[~,fval,~,output3] = fdipa(@fun_dist_ellip,x0,@g_dist_ellip,mj,y0,my_options);
+fprintf('Modified Newton & %d & %11f & %11f & %11.5e & %11f \\\\ \n', output3.iterations,fval, sqrt(fval), output3.firstorderopt, output3.walltime)
+%output for table 8 in the paper
+fprintf('%d & %3.2f & %d & %3.2f & %d & %3.2f \n', output2.iterations, output2.walltime, output1.iterations, output1.walltime, output3.iterations, output3.walltime)
 
 
-clear 'x0' 'y0' 'mj' 'my_options' 'x' 'fval' 'exitflag' 'output'
+clear 'x0' 'y0' 'mj' 'my_options' 'x' 'fval' 'exitflag' 'output1' 'output2' 'output3' 'mod_newton' 'epsilon'
 
 function [fun,grad_f]=fun_dist_ellip(x)
 % Objective function for the example for distance between two ellipses

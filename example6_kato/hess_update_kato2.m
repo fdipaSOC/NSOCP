@@ -34,10 +34,4 @@ function B = hess_update_kato2(x_new,y_new,C,d,e,a1,a2)
         %if cholesky factorization fails indicates that matB is not positive definite.
         B = B+(abs(min(eig(B)))+0.1)*eye(n);
     end
-    
-    % epsilon = min(eig(B));
-    % if epsilon <= 0.0
-    %     B = B+(abs(epsilon)+0.1)*eye(n);
-    % end
-
  

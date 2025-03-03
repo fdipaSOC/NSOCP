@@ -40,8 +40,11 @@ seed = RandStream('mt19937ar','Seed',1);
 
 [mu,Mchol_1,Mchol_2]=split_chol(X,Y);
 mj=[n+1;n+1;1;1;1];
-maxiter = 20;
+maxiter = 30;
 report = zeros(maxiter,7);
+Prediction_X = zeros(m,maxiter);
+AUC = zeros(maxiter,1);
+Accu = zeros(maxiter,1);
 C=0.25;
 
 %%experiment 1 : logarithmic objective with weights 1/2, 1/2
@@ -57,42 +60,41 @@ for iter=1:maxiter
     kappa=sqrt(nu./(1-nu));
     
     %look for feasible starting point using an auxiliary problem
-    %in order to find different feasible points, we imporse 
-    % lower bounds in the values of kappa which are selecte randomly
-    x0_aux = [zeros(n+2,1);10];
-    myoptions_aux = fdipa_options('Display','off','LowerOptimalityBound', 0);
-    x_aux = fdipa(@(z) f_svm_aux(z),x0_aux,@(z) g_svm_aux(z,mj,mu,kappa,Mchol_1,Mchol_2),mj,[],myoptions_aux);
-    x0 = x_aux(1:(end-1));
-
-    % % We search for a feasible starting point using CVX
-    % cvx_begin quiet
-    % variables w(n) b
-    % subject to
-    % kappa*norm(Mchol_1'*w,2)<=w'*mu(1,:)'+b;
-    % kappa*norm(Mchol_2'*w,2)<=-w'*mu(2,:)'-b;
-    % 0<=w'*mu(1,:)'+b-1;
-    % 0<=-w'*mu(2,:)'-b-1;
-    % cvx_end
-    % x0=[w;b;kappa];
+    %in order to find different feasible points, take a different 
+    % initial guess where kappa is chosen randomly
+    xguess = [zeros(n+1,1);kappa];
+    [x0,~] = searchStartingPoint(n+3,const,mj,xguess);
     
     [x,fval,~,output]=fdipa(fun,x0,const,mj,[],myoptions);
     kappa_opt=x(n+2:end);
     eta_opt=kappa_opt.^2./(1+kappa_opt.^2);    
         report(iter,:) = [output.iterations, output.walltime, fval,output.firstorderopt , output.compslack,output.constrviolation,eta_opt(1)];
     fprintf('%d & %d & %11f & %11.5e & %11f & %11.5f \\\\ \n',m, output.iterations,fval, output.firstorderopt, output.walltime,eta_opt(1))
-
+    Prediction_X(:,iter)=sign(X*x(1:n)+x(n+1));
+    [AUC(iter),Accu(iter)]=medi_auc_accu(Prediction_X(:,iter),Y);
 end
+
+mean_AUC=mean(AUC);
+max_Accu=max(Accu);
+min_Accu=min(Accu);
+mean_Accu=mean(Accu);
+
 max_report = max(report);
 min_report = min(report);
 mean_report = mean(report);
-array2table([max_report; min_report;mean_report] ,...
-    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1'},...
+summary = array2table([max_report max_Accu ; min_report min_Accu;mean_report  mean_Accu] ,...
+    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'Accu'},...
     'RowNames',{'max','min','mean'});
+disp(summary)
 
-fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f  & %11.5e & %11.5e \\\\\n", ...
-mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,4),max_report(1,5));
+fprintf("{\\bf "+ label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f  & %11.5e & %11.5e & %4.4f \\\\\n", ...
+mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),mean_report(1,7),mean_report(1,4),mean_report(1,5),mean_Accu);
 
-
+clear 'Accu' 'AUC' 'const' 'C' 'eta_opt' 'fun' 'fval' 'iter' 'kappa' 'kappa_opt' ...
+    'label' 'm' 'max_Accu' 'maxiter' 'Mchol_1' 'Mchol_2' 'mean_Accu' 'mean_AUC' ...
+    'max_report' 'mean_report' 'min_Accu' 'min_report' 'mj' 'mu' 'myoptions' ...
+    'n' 'nu' 'output' 'perm' 'Prediction_X' 'report'  'seed' 'summary' 'theta'...
+    'x' 'X' 'x0' 'xguess' 'Y'
 
 
 function [f,Gf]=f_svm_ccl1(x,C)
@@ -113,33 +115,4 @@ function [f,Gf]=f_svm_ccl1(x,C)
     Gf=[x(1:(n-2));0;-2* C *x(n)/(1 + x(n)^2)^2];
 end
 
-
-
-function [f,Gf]=f_svm_aux(x)
-    f = x(end);
-    Gf = [zeros(length(x)-1,1);1];
-end
-
-function [g,Gradg]=g_svm_aux(x,mj,mu,kappa,Mchol_1,Mchol_2)
-    [g,Gradg] = g_svm_ccl1(x(1:(end-1)),mu,Mchol_1,Mchol_2);
-
-    n_cones = length(mj); % number of cones
-    block_begin = ones(n_cones,1); % index of the first coordinate of i-th cone
-    block_end = mj; % index of the last coordinate of i-th cone 
-    if n_cones>1
-        for i=2:n_cones
-            block_end(i)=block_end(i-1)+mj(i);
-            block_begin(i)=block_end(i-1)+1;
-        end
-    end 
-
-    %impose a lower bound in the values of the kappa vector
-    g(block_begin(3))= g(block_begin(3))-kappa;
-    Gradg= [Gradg,zeros(sum(mj),1)];
-
-    for k=1:n_cones
-        g(block_begin(k)) = g(block_begin(k)) + x(end);
-        Gradg(block_begin(k),:) = Gradg(block_begin(k),:)+ [zeros(1,length(x)-1), 1];
-    end
-end
 

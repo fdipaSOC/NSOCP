@@ -17,7 +17,7 @@
 seed = RandStream('mt19937ar','Seed',1);
 
 % choice of cones for the example
-%mj= [5;5];
+mj= [5;5];
 %mj= [5;5;20];
 %mj=[5;5;20;20];
 %mj=[10;10;20;20;10];
@@ -26,7 +26,7 @@ seed = RandStream('mt19937ar','Seed',1);
 %mj=[30;30;40;40;30;30;40];
 %mj=[40;40;50;50;50;40;30;40];
 %mj=[50;60;70;70;50;60;60;60];
-mj=[60;70;70;70;60;70;60;70;50];
+%mj=[60;70;70;70;60;70;60;70;50];
 %mj=[80;90;90;90;80;100;80;70;60];
 
 n = sum(mj);
@@ -50,47 +50,54 @@ end
 y0 =b;
 
 x0 = zeros(n,1);
+% or we can use the subroutine to look for a feasible point using fdipa
+%xguess = -1 + 2*rand(seed,n,1);
+%x0 = searchStartingPoint(n,@(x)g_kato1_lin(x,A,b),mj,xguess);
+
 
 disp('experiment 1a: Hessian update BFGS (default) ');
-my_options = fdipa_options('Display', 'final');
+my_options = fdipa_options('Display', 'final', ...
+    'ParEta',0.5);
 [~,fval,~,output] =fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
 fprintf("Number of Hessian resets: %d \n",output.hessianresetcount)
 %Output for paper
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
-fprintf(' & %d & %11f & %11.5e & %11f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf(' & %d & %5.3f & %11.5e & %5.3f \\\\ %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
 disp('experiment 1b: Hessian update Modified-Newton ');
 hess_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) hess_update_kato1(x_new,C,d);
 my_options = fdipa_options('Display', 'final',...
     'HessianApproximation','user-supplied','HessianFcn',hess_update, ...
-    'ParEta',1e-4);
+    'ParEta',0.5);
 [~,fval,~,output]=fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
 fprintf("Number of Hessian resets: %d \n",output.hessianresetcount)
 %Output for paper
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
-fprintf(' & %d & %11f & %11.5e & %11f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf(' & %d & %5.3f & %11.5e & %5.3f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
+
 
 disp('experiment 1c: Hessian update Barzilai and Borwein');
 hess_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) hess_update_kato1_BB(x_new, x_old, y_new, y_old, fun, gj, hess_old);
 my_options = fdipa_options('Display', 'final',...
     'HessianApproximation','user-supplied','HessianFcn',hess_update, ...
-    'ParEta',1e-4);
+    'ParEta',0.5);
 [~,fval,~,output]=fdipa(@(x)fun_kato1(x,C,d,f),x0,@(x)g_kato1_lin(x,A,b),mj,y0,my_options);
 fprintf("Number of Hessian resets: %d \n",output.hessianresetcount)
 %Output for paper
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
-fprintf(' & %d & %11f & %11.5e & %11f \\\\ %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf(' & %d & %5.3f & %11.5e & %5.3f \\\\ %% BB update \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
 
 
 clear 'A' 'b' 'C' 'd' 'default_options' 'f' 'i' 'first'  'lamb_min' 'last' ...
-    'mj' 'my_options' 'n' 'nCones' 'seed' 't' 'x0' 'xmin' 'y0' 'Z'
+    'mj' 'my_options' 'n' 'nCones' 'seed' 't' 'x0' 'xmin' 'y0' 'Z' 'fval' ...
+    'hess_update' 'output'
 
 function [fun,grad_f]=fun_kato1(x,C,d,f)
 % Objective function for the Kato-Fukushima example of 

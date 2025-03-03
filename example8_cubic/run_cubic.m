@@ -23,7 +23,7 @@ my_options = fdipa_options('Display','iter');
 
 fprintf('%d & %11f & %11.5e & %11f \\\\ \n', output.iterations,fval, output.firstorderopt, output.walltime)
 
-clear 'A' 'b' 'x0' 'y0' 'mj' 'my_options'
+clear 'A' 'b' 'x0' 'y0' 'mj' 'my_options' 'fval' 'output'
 
 function [fun,grad_f] = fun_cubic(x)
 % Cubic objective function

@@ -74,21 +74,26 @@ seed = RandStream('mt19937ar','Seed',1);
 %m=10;
 %m=30;
 %m=100;
-%m=1000;
-m=10000;
+m=1000;
+%m=10000;
+
+% we construct a feasible starting point using the geometry of the problem
 a = 10*rand(seed);
 b = 10*rand(seed);
 c = -1+ 2*rand(seed,m,1);
 x0  = [a;b; rand(seed)*sqrt(2 *a*b)/norm(c)*c];
+% or we can use the subroutine to look for a feasible point using fdipa
+%x0 = searchStartingPoint(m+2,@(x)g_rotated_conic(x,m),[]);
 
-my_options = fdipa_options('Display','final');
-[~,fval,~,output] = fdipa(@(x)fun_rotated_conic(x,m),x0,@(x)g_rotated_conic(x,m),...
+
+my_options = fdipa_options('Display','final','ParEta',0.5);
+[~,~,~,output] = fdipa(@(x)fun_rotated_conic(x,m),x0,@(x)g_rotated_conic(x,m),...
     [],[],my_options);
 
-%for paper [x,fval,exitflag,output]
-fprintf('%d & %d & %11f & %11.5e & %11f \\\\ \n',m, output.iterations,fval, output.firstorderopt, output.walltime)
+% output for the paper 
+fprintf('%d & %d & %11.5e & %3.2f \n',m, output.iterations, output.firstorderopt, output.walltime)
 
-clear 'seed' 'a' 'b' 'c' 'x0' 'myoptions' 'fval' 'output'
+clear 'seed' 'a' 'b' 'c' 'x0' 'myoptions' 'fval' 'output' 'm' 'my_options'
 
 function [fun,grad_f]=fun_rotated_conic(x,m)
 % Quadratic objective function for the example with rotated conic constraint

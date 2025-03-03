@@ -22,10 +22,10 @@ seed = RandStream('mt19937ar','Seed',1);
 %mj=[5;5;20;20];
 %mj=[10;10;20;20;10];
 %mj=[10;10;20;20;20;20];
-%mj=[20;20;30;30;20;30;10];
+mj=[20;20;30;30;20;30;10];
 %mj=[30;30;40;40;30;30;40];
 %mj=[40;40;50;50;50;40;30;40];
-mj=[50;60;70;70;50;60;60;60];
+%mj=[50;60;70;70;50;60;60;60];
 %mj=[60;70;70;70;60;70;60;70;50];
 %mj=[80;90;90;90;80;100;80;70;60];
 
@@ -51,16 +51,21 @@ for i=1:nCones
 end
 y0 = b;
 x0 = zeros(n,1);
+% or we can use the subroutine to look for a feasible point using fdipa
+%xguess = -1 + 2*rand(seed,n,1);
+%x0 = searchStartingPoint(n,@(x)g_kato2_nlin(x,a1,a2,b),mj,xguess);
+
 
 disp('experiment 2a: Hessian update bfgs');
-my_options = fdipa_options('Display', 'final','MaxIterations',30000,'StepTolerance',1e-15);%, ...
-    %'StepTolerance',1e-10,'LinearSystemTolerance',1e-4);
+my_options = fdipa_options('Display', 'final','MaxIterations',30000, ...
+    'ParEta',0.5);
 [~,fval,~,output]=fdipa(@(x)fun_kato2(x,C,d,e,f),x0,@(x)g_kato2_nlin(x,a1,a2,b), ...
     mj,y0,my_options);
+fprintf("Number of Hessian resets: %d \n",output.hessianresetcount)
 fprintf('[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
-fprintf(' & %d & %11f & %11.5e & %11f \\\\ \\relax %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf(' & %d & %5.3f & %11.5e & %5.3f \\\\ \\relax %%BFGS \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
 
 
@@ -69,17 +74,19 @@ hess_update = @(x_new, x_old, y_new, y_old, fun, gj, hess_old) hess_update_kato2
 
 my_options = fdipa_options('Display', 'final',...
     'HessianApproximation','user-supplied','HessianFcn', hess_update,...
-    'MaxIterations',30000,'StepTolerance',1e-15);%, 'StepTolerance',1e-10,'LinearSystemTolerance',1e-4);   
+    'MaxIterations',30000, ...
+    'ParEta',0.5); 
 [~,fval,~,output]=fdipa(@(x)fun_kato2(x,C,d,e,f),x0,@(x)g_kato2_nlin(x,a1,a2,b), ...
     mj,y0,my_options);
+fprintf("Number of Hessian resets: %d \n",output.hessianresetcount)
 fprintf('~[');
 fprintf('%g, ', mj(1:end-1));
 fprintf('%g]', mj(end));
-fprintf(' & %d & %11f & %11.5e & %11f \\\\ \\relax %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
+fprintf(' & %d & %5.3f & %11.5e & %5.3f \\\\ \\relax %%mod-newton \n',output.iterations,fval, output.firstorderopt, output.walltime)
 
 clear 'a1' 'a2' 'b' 'C' 'd' 'e' 'f' 'i' 'first' 'lamb_min' 'last' 'mj' ...
     'my_options' 'n' 'nCones' 'seed' 'x0' 'xmin' 'y0' 'x' 'fval' 'exitflag' ...
-    'output' 't' 'default_options'
+    'output' 't' 'default_options' 'hess_update'
 
 function [fun,grad_f]=fun_kato2(x,C,d,e,f)
 % Objective function for the Kato-Fukushima example of 

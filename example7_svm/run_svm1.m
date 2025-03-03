@@ -39,48 +39,58 @@ seed = RandStream('mt19937ar','Seed',1);
 [mu,Mchol_1,Mchol_2]=split_chol(X,Y);
 mj=[n+1;n+1;1;1];
 theta=1/2;
-maxiter = 5;
+maxiter = 30;
 report = zeros(maxiter,8);
-
+Prediction_X = zeros(m,maxiter);
+AUC = zeros(maxiter,1);
+Accu = zeros(maxiter,1);
 
 %%experiment 1 : logarithmic objective with weights 1/2, 1/2
 disp('Experiment 1: logarithmic objective with weights 1/2, 1/2, BFGS');
 % use BFGS hessian update for the optimzation
-myoptions = fdipa_options('MaxIterations',10000,'Display','final',...
-    'NumericalConditioning',1e15, ...
-    'OptimalityTolerance', 1e-6, ...
-    'StepTolerance', 1e-10);
+myoptions = fdipa_options('MaxIterations',10000,'Display','final');
+
 fun=@(x)f_svm_CoDo(x,theta);
 const=@(x)g_svm(x,mu,Mchol_1,Mchol_2);
 
 for iter=1:maxiter
     nu = 0.1*rand(seed,2,1);
     kappa=sqrt(nu./(1-nu));
-    
-    % We search for a feasible starting point using CVX
-    cvx_begin quiet
-    variables w(n) b
-    subject to
-    kappa*norm(Mchol_1'*w,2)<=w'*mu(1,:)'+b-1;
-    kappa*norm(Mchol_2'*w,2)<=-w'*mu(2,:)'-b-1;
-    cvx_end
-    x0=[w;b;kappa];
-    
+
+    %look for feasible starting point using an auxiliary problem
+    %in order to find different feasible points, take a different 
+    % initial guess where kappa is chosen randomly
+    xguess = [zeros(n+1,1);kappa];
+    [x0,~] = searchStartingPoint(n+3,const,mj,xguess);
+   
     [x,fval,~,output]=fdipa(fun,x0,const,mj,[],myoptions);
     kappa_opt=x(n+2:end);
     eta_opt=kappa_opt.^2./(1+kappa_opt.^2);    
     report(iter,:) = [output.iterations, output.walltime, fval,output.firstorderopt , output.compslack,output.constrviolation,eta_opt(1),eta_opt(2)];
     fprintf('%d & %d & %11f & %11.5e & %11f & %11.5f & %11.5f \\\\ \n',m, output.iterations,fval, output.firstorderopt, output.walltime,eta_opt(1),eta_opt(2))
-   
+    Prediction_X(:,iter)=sign(X*x(1:n)+x(n+1));
+    [AUC(iter),Accu(iter)]=medi_auc_accu(Prediction_X(:,iter),Y);
 end
+
+mean_AUC=mean(AUC);
+max_Accu=max(Accu);
+min_Accu=min(Accu);
+mean_Accu=mean(Accu);
+
 max_report = max(report);
 min_report = min(report);
 mean_report = mean(report);
-array2table([max_report; min_report;mean_report] ,...
-    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2'},...
-    'RowNames',{'max','min','mean'})
+summary=array2table([max_report max_Accu ; min_report min_Accu;mean_report  mean_Accu] ,...
+    'VariableNames',{'iterations','time','fval','norm_lag','comp_slack','feasibility','eta1', 'eta2','Accu'},...
+    'RowNames',{'max','min','mean'});
+disp(summary);
 
-fprintf("{\\bf " + label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e \\\\\n", ...
-mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),report(1,7),report(1,8),report(1,4),max_report(1,5))
+fprintf("{\\bf " + label + "} & %4.1f & %d & %d & %4.2f & %4.2f & %4.2f & %4.4f & %4.4f & %11.5e & %11.5e & %4.4f\\\\\n", ...
+mean_report(1), min_report(1), max_report(1),mean_report(2), min_report(2), max_report(2),mean_report(1,7),mean_report(1,8),mean_report(1,4),mean_report(1,5),mean_Accu);
 
-
+clear 'Accu' 'AUC' 'const' 'eta_opt' 'fun' 'fval' 'iter' 'kappa' 'kappa_opt' ...
+    'label' 'm' 'max_Accu' 'maxiter' 'Mchol_1' 'Mchol_2' 'mean_Accu' 'mean_AUC' ...
+    'max_report' 'mean_report' 'min_Accu' 'min_report' 'mj' 'mu' 'myoptions' ...
+    'n' 'nu' 'output' 'perm' 'Prediction_X' 'report'  'seed' 'summary' 'theta'...
+    'x' 'X' 'x0' 'xguess' 'Y'
+    

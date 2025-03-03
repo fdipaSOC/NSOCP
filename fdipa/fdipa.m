@@ -56,8 +56,14 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
 % OUTPUTS:
 %  - x: argmin(fun)
 %  - fval: Value of fun at the solution x.
-%  - exitflag: Indicator of the status of the execution, has the value 0 
-%              in successful.
+%  - exitflag: Indicator of the status of the execution. 
+%           -1 Starting point is unfeasible
+%            0 The number of iterations reach \verb"options.MaxIterations", 
+%              or Linear System is too stiff, so the algorithm cannot continue
+%            1 First-order optimality measure was less than 
+%              options.OptimalityTolerance
+%            2 The norm  of direction da was less than options.StepTolerance 
+%              or stepsize was less than options.StepTolerance
 %  - output: A structure with information about the optimization. The 
 %            fields of the structure are the following:
 %        output.iterations: Number of iterations taken
@@ -243,6 +249,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
     xk = x0; 
     yk = y0;
     % %this allows the use of a custom Hessian in the first iteration
+    % %otherwise, the identity it is always used in the first iteration
     % try matB = b_update(xk,[],yk,[],fun,gj, eye(dimx));
     % catch
     %     matB=eye(dimx); 
@@ -586,7 +593,7 @@ function [x,fval,exitflag,output,lambda,grad,hessian] = fdipa(varargin)
             num2str(options.StepTolerance));
     elseif fval < options.LowerOptimalityBound
         % stop if objective function value is too small
-        exitflag = 2;
+        exitflag = 3;
         output.message = append('Objetive function value is less than: f(x) <',...
             num2str(options.LowerOptimalityBound));
     elseif k==options.MaxIterations 

@@ -48,7 +48,7 @@ function [lambda1,lambda2,u1,u2]=spectral_decomposition(w_vec,mj)
                 u2 = 0.5*[1; v];
                 lambda1 = w1 - norm(w_bar);
                 lambda2 = w1 + norm(w_bar);
-            
+                
             else
                 % if norm(w_bar) = 0 we can take any unitary v, so 
                 % we choose v to be the first cannonical vector

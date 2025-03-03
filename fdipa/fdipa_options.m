@@ -51,8 +51,6 @@ function optobj = fdipa_options(varargin)
                     msj=optobj.edit('HessianFcn',varargin{2*k}) ;
                 case 'HessianApproximation'      
                     msj=optobj.edit('HessianApproximation',varargin{2*k}) ;
-                %case 'HessianResetIterations'      
-                %    msj=optobj.edit('HessianResetIterations',varargin{2*k}) ;                    
                 case 'ParXi'        
                     msj=optobj.edit('ParXi',varargin{2*k}) ;
                 case 'ParEta' %Armijo parameter for the line search 
